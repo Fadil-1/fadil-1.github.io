@@ -996,7 +996,7 @@ body {
 }
 
 /* Keep the project navigation scoped to the sidebar container. */
-.underline-flex {
+.container-main.cpu-page .underline-flex {
   position: static !important;
   width: auto !important;
   height: auto !important;
@@ -1008,7 +1008,7 @@ body {
 
 /* Desktop and landscape tablet layout */
 @media screen and (min-width: 1001px) {
-  .container-main {
+  .container-main.cpu-page {
     width: 100%;
     max-width: 1250px;
     margin: 0 auto;
@@ -1017,11 +1017,11 @@ body {
     padding: 20px;
   }
 
-  .container-toggle {
+  #container-toggle {
     display: none !important;
   }
 
-  .sidebar {
+  .container-main.cpu-page .sidebar {
     position: sticky !important;
     top: 90px;
     left: auto !important;
@@ -1036,7 +1036,7 @@ body {
     z-index: 1;
   }
 
-  .content {
+  .container-main.cpu-page .content {
     flex: 1 1 auto;
     min-width: 0;
     max-width: none;
@@ -1044,7 +1044,7 @@ body {
     padding: 70px 48px 60px 48px !important;
   }
 
-  .content-container {
+  .container-main.cpu-page .content-container {
     max-width: 900px;
     margin: 0 auto;
   }
@@ -1052,7 +1052,7 @@ body {
 
 /* Phone and portrait tablet layout */
 @media screen and (max-width: 1000px) {
-  .container-main {
+  .container-main.cpu-page {
     display: block;
     width: 100%;
     max-width: 100%;
@@ -1060,12 +1060,12 @@ body {
     margin: 0 auto;
   }
 
-  .container-toggle,
-  .sidebar {
+  #container-toggle,
+  .container-main.cpu-page .sidebar {
     display: none !important;
   }
 
-  .content {
+  .container-main.cpu-page .content {
     width: 100%;
     min-width: 0;
     max-width: 100%;
@@ -1074,7 +1074,7 @@ body {
     font-size: 18px;
   }
 
-  .content-container {
+  .container-main.cpu-page .content-container {
     max-width: 100%;
     margin: 0 auto;
     overflow-wrap: break-word;
@@ -1082,31 +1082,31 @@ body {
 }
 
 /* Keep technical content from forcing the whole page sideways. */
-.content-container img,
-.content-container figure img {
+.container-main.cpu-page .content-container img,
+.container-main.cpu-page .content-container figure img {
   max-width: 100%;
   height: auto;
 }
 
-.content-container figure {
+.container-main.cpu-page .content-container figure {
   max-width: 100%;
   margin-left: auto;
   margin-right: auto;
   overflow-x: auto;
 }
 
-.content-container table {
+.container-main.cpu-page .content-container table {
   display: block;
   width: 100%;
   max-width: 100%;
   overflow-x: auto;
 }
 
-.content-container pre {
+.container-main.cpu-page .content-container pre {
   max-width: 100%;
   overflow-x: auto;
 }
 
-.content-container code {
+.container-main.cpu-page .content-container code {
   overflow-wrap: anywhere;
 }
