@@ -83,24 +83,54 @@ layout: compress
 {% include footer.html %}
 
 <script>
+  const sidebar = document.getElementById('sidebar');
+  const menuButton = document.getElementById('myButton');
   const toggleButton = document.getElementById('toggleButton');
-  toggleButton.addEventListener('click', function() {
-    toggleButton.classList.toggle('active');
+
+  menuButton.setAttribute('aria-controls', 'sidebar');
+  menuButton.setAttribute('aria-expanded', 'false');
+
+  function openCpuSidebar() {
+    sidebar.classList.add('sidebarshow');
+    toggleButton.classList.add('active');
+    menuButton.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeCpuSidebar() {
+    sidebar.classList.remove('sidebarshow');
+    toggleButton.classList.remove('active');
+    toggleButton.classList.remove('toggle');
+    menuButton.setAttribute('aria-expanded', 'false');
+  }
+
+  function isCpuSidebarOpen() {
+    return sidebar.classList.contains('sidebarshow');
+  }
+
+  menuButton.addEventListener('click', function(event) {
+    event.stopPropagation();
+
+    if (isCpuSidebarOpen()) {
+      closeCpuSidebar();
+    } else {
+      openCpuSidebar();
+    }
   });
 
-  var btn = document.getElementById('myButton');
-  var btnst = true;
-  btn.onclick = function() {
-    if(btnst == true) {
-      document.querySelector('.toggle span').classList.add('toggle');
-      document.getElementById('sidebar').classList.add('sidebarshow');
-      btnst = false;
-    } else if(btnst == false) {
-      document.querySelector('.toggle span').classList.remove('toggle');
-      document.getElementById('sidebar').classList.remove('sidebarshow');
-      btnst = true;
+  document.addEventListener('click', function(event) {
+    const clickedInsideSidebar = sidebar.contains(event.target);
+    const clickedMenuButton = menuButton.contains(event.target);
+
+    if (isCpuSidebarOpen() && !clickedInsideSidebar && !clickedMenuButton) {
+      closeCpuSidebar();
     }
-  }
+  });
+
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' && isCpuSidebarOpen()) {
+      closeCpuSidebar();
+    }
+  });
 </script>
 </body>
 </html>
