@@ -10,7 +10,8 @@
 
   @include breakpoint($lg) {
     margin: 0 auto;
-    height: 36em;
+    min-height: 28rem;
+    height: clamp(28rem, 58vh, 36rem);
   }
 
   &::before {
