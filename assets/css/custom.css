@@ -1178,10 +1178,11 @@ body {
 }
 
 .container-main.cpu-page .content-container table {
-  display: block;
+  display: table;
   width: 100%;
   max-width: 100%;
-  overflow-x: auto;
+  table-layout: auto;
+  border-collapse: collapse;
 }
 
 .container-main.cpu-page .content-container pre {
