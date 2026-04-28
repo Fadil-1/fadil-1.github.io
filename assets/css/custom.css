@@ -983,3 +983,130 @@ footer{
   max-width: 1000px; 
   width: 100%;
 }
+
+/* ==========================================================
+   CPU project page layout
+   Responsive layout rules for the 8-bit CPU documentation pages.
+   ========================================================== */
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Keep the project navigation scoped to the sidebar container. */
+.underline-flex {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin-left: 0 !important;
+  padding-top: 0 !important;
+  overflow-x: hidden;
+}
+
+/* Desktop and landscape tablet layout */
+@media screen and (min-width: 1001px) {
+  .container-main {
+    width: 100%;
+    max-width: 1250px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-start;
+    padding: 20px;
+  }
+
+  .container-toggle {
+    display: none !important;
+  }
+
+  .sidebar {
+    position: sticky !important;
+    top: 90px;
+    left: auto !important;
+    width: 275px !important;
+    max-width: 275px !important;
+    flex: 0 0 275px;
+    height: calc(100vh - 120px) !important;
+    overflow-y: auto;
+    background: #ffffff;
+    border-bottom: none;
+    padding: 20px 16px 30px 16px;
+    z-index: 1;
+  }
+
+  .content {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+    margin: 0 !important;
+    padding: 70px 48px 60px 48px !important;
+  }
+
+  .content-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+}
+
+/* Phone and portrait tablet layout */
+@media screen and (max-width: 1000px) {
+  .container-main {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    margin: 0 auto;
+  }
+
+  .container-toggle,
+  .sidebar {
+    display: none !important;
+  }
+
+  .content {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0 !important;
+    padding: 86px 22px 40px 22px !important;
+    font-size: 18px;
+  }
+
+  .content-container {
+    max-width: 100%;
+    margin: 0 auto;
+    overflow-wrap: break-word;
+  }
+}
+
+/* Keep technical content from forcing the whole page sideways. */
+.content-container img,
+.content-container figure img {
+  max-width: 100%;
+  height: auto;
+}
+
+.content-container figure {
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  overflow-x: auto;
+}
+
+.content-container table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.content-container pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.content-container code {
+  overflow-wrap: anywhere;
+}

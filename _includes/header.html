@@ -1,5 +1,5 @@
 <header class="header fix-nav" itemscope itemtype="http://schema.org/SiteNavigationElement" aria-label="Main navigation">
-  <div class="container" onmouseleave="myButton1()" onclick="myButton()">
+  <div class="container">
     <div class="header__inner">
       <a class="header__logo" href="{{ '/' | relative_url }}">
         <div class="header__logo--container">
@@ -17,7 +17,7 @@
         </div>
       </nav>
       <div class="header__toggle" id="header__toggle">
-        <button class="toggle_button" id="togglebutton" onmouseleave="myButton1()" onclick="myButton()">
+        <button class="toggle_button" id="togglebutton">
           <span></span>
           <span></span>
           <span></span>
@@ -26,27 +26,3 @@
     </div>
   </div>
 </header>
-<script>
-     
-
- 
-
-    function myButton(){    
-            document.getElementById("container-toggle").style.visibility = "hidden"
-  }
-  function myButton1(){      
-            document.getElementById("container-toggle").style.visibility = "visible"
-  }
-
-  // Define the media query
-const mediaQueryDt = window.matchMedia('(min-width: 1026px)');
-
-// Check if the media query matches
-if (mediaQueryDt.matches) {
-  // Media query matches (viewport width is at least 768px)
-  // Perform actions or apply styles for this condition
-  function myButton1(){      
-            document.getElementById("container-toggle").style.visibility = "hidden"
-  }
-} 
-</script>
