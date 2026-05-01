@@ -1,3 +1,37 @@
 _site/
 .jekyll-cache/
+.jekyll-metadata
 .sass-cache/
+
+# Ruby / Bundler local installs
+.bundle/
+vendor/bundle/
+
+# Node / frontend tooling
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local build / temporary output
+.tmp/
+tmp/
+temp/
+*.log
+
+# Local checkpoints and backups
+checkpoint_*/
+checkpoint*/
+backup_*/
+BACKUP/
+BACKUPS/
+
+# Editor / IDE local state
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini

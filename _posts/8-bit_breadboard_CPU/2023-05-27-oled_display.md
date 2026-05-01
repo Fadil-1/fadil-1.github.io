@@ -4,6 +4,7 @@ title: OLED
 mathjax: true
 similar: 8-bit-computers
 date_child: "May 27, 2023"
+last_updated: "April 28, 2026"
 category: children
 parent: 8-bit_breadboard_CPU
 permalink: /blog/8-bit_breadboard_CPU/oled_display/ 
@@ -14,12 +15,12 @@ permalink: /blog/8-bit_breadboard_CPU/oled_display/
 
 # BASICS PRIMER
 <div class="grey-background">
-<p>Unlike traditional LCD (Liquid Crystal Displays), which rely on a uniform backlight, each pixel in an OLED(Organic Light-Emitting Diode) display emits its own light. This makes color contrasts look very vibrant. Typically, LCDs used for minimal projects, such as the HD44780 based LCD2004, have convenient built-in features such as “auto increment after read/write”. On these LCDs, characters and symbols can be placed at pre-encoded dot-matrix blocks within the display.</p>
+<p>Unlike traditional LCD (Liquid Crystal Displays), which rely on a uniform backlight, each pixel in an OLED(Organic Light-Emitting Diode) display emits its own light. This makes color contrasts look very vibrant. Typically, LCDs used for minimal projects, such as the HD44780 based LCD2004, have convenient built-in features such as "auto increment after read/write". On these LCDs, characters and symbols can be placed at pre-encoded dot-matrix blocks within the display.</p>
 
 <p>On the other hand, similarly-sized OLED displays are controlled on a pixel-base. While this offers more control over each pixel, it also introduces greater complexity in programming and control as each pixel must be addressed and manipulated independently, which can be more challenging and time-consuming.</p>
 </div>
 
-I use the Adafruit 2.7" Monochrome 128x64 OLED Display Module. This display offers both SPI and 8-bit parallel mode(6800 and 8080). Since my build is relatively slow(At least compared to commercial MCUs), I use the parallel mode; 6800 specifically since it’s simpler and more common than 8080. The display is driven by the Solomon Systech [SSD1325](http://www.adafruit.com/datasheets/SSD1325.pdf) OLED driver and uses 3V logic HIGH, so I use some level shifters to step down the 5V voltage coming from other parts of the CPU into the displays' 3V input pins. The LOW input(3.3V) of the level shifters comes from a very convenient 3.3V output from the SD card reader.
+I use the Adafruit 2.7" Monochrome 128x64 OLED Display Module. It has both SPI and 8-bit parallel mode(6800 and 8080). Since my build is relatively slow(At least compared to commercial MCUs), I use the parallel mode; 6800 specifically since it’s simpler and more common than 8080. The display is driven by the Solomon Systech [SSD1325](http://www.adafruit.com/datasheets/SSD1325.pdf) OLED driver and uses 3V logic HIGH, so I use some level shifters to step down the 5V voltage coming from other parts of the CPU into the displays' 3V input pins. The LOW input(3.3V) of the level shifters comes from a very convenient 3.3V output from the SD card reader.
 
 # Implementation
 
@@ -31,7 +32,7 @@ Below's an image of the OLED display module:
 </figure>
 <br>
 
-## **Control/Pins lines involved(10):**
+## **Control/Pins lines involved (10):**
 - \|← Pin 4 - **~OS** (**data/command selector pin)**.  A LOW in OS corresponds to a COMMAND read/write and a HIGH OS indicates a DATA read/write.
 - \|← Pin 5 - **OD** (**Data/Write control pin**).
 - \|← Pin 6 - **~OE** (**Enable/Latch control pin**).
@@ -39,7 +40,7 @@ Below's an image of the OLED display module:
 - \|← Pin 15 - **CS** (**Active Low Chip Select pin,** always tied to ground).
 - \|← Pin 16 - **OC** (Clear/Reset pin).
 
-**~OE** serves as the data latch trigger when **OD** is LOW, with data being latched at the falling edge of **~OE**. Note from the schematic that **OD** is tied to the "direction" pin of the bus transceiver. This means that, unless data is being read from the display(in other words the display is outputting to the data bus), the bus transceiver is always going to direct data from the data bus to the display. And the display always sensing the content of the bus is not an issue because it does not latch any data unless **~OE** gets asserted.
+**~OE** is the data latch trigger when **OD** is LOW, with data being latched at the falling edge of **~OE**. Note from the schematic that **OD** is tied to the "direction" pin of the bus transceiver. This means that, unless data is being read from the display(in other words the display is outputting to the data bus), the bus transceiver is always going to direct data from the data bus to the display. And the display always sensing the content of the bus is not an issue because it does not latch any data unless **~OE** gets asserted.
 
 <figure>
     <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/oled/1.jpg" alt="Figure 2: Control pins of 6800 interface - Solomon Systech">
@@ -77,7 +78,7 @@ Address are simply latched after setting ~OS = 1.
 The rest of the table is included in the datasheet starting at page 31.
 
 On page 6 of the SSD1325 datasheet:<br>
- “*SSD1325 displays data directly from its internal 128x80x4 bits Graphic Display Data RAM (GDDRAM). Data/Commands are sent from general MCU through the hardware selectable 6800-/8080-series compatible Parallel Interface or Serial Peripheral Interface.*”<br> 
+ "*SSD1325 displays data directly from its internal 128x80x4 bits Graphic Display Data RAM (GDDRAM). Data/Commands are sent from general MCU through the hardware selectable 6800-/8080-series compatible Parallel Interface or Serial Peripheral Interface.*"<br> 
 
 This means that by default, the SSD1325 expects to interact with a 128x80 display. Since the display I use is a 128x64, the start and end GDDRAM addresses must be adjusted accordingly.
 
@@ -162,8 +163,4 @@ The initialization sequence below, among many things, mainly clears any residual
 - Send `0b00000000` / `0x00`
 
 **14- Turn the Display ON**:
-- Send `0b10101111` / `0xAF` (command to turn on the display).<br>
-
-[**<<<<<<<<<<<<<<<<<<<< Previous Post: Instructions**]({{ site.baseurl }}{% link _posts/8-bit_breadboard_CPU/2023-05-27-instructions.md %})
-
-<i class="fas fa-calendar-alt"></i> <span style="font-size: 15px; font-weight: bolder;">Updated:  </span><time>May 21, 2024</time>
+- Send `0b10101111` / `0xAF` (command to turn on the display).
