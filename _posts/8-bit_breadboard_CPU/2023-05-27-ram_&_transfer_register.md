@@ -134,10 +134,16 @@ Note:  **~WE** has priority over **~OE**, provided the chip is enabled.
 
 ## ICs
 
-- UM61512AK ([Datasheet](http://www.allcomponents.ru/umc/um61512ak15.htm))
-- X28C256 32K x 8-bit EEPROM ([Datasheet](https://ww1.microchip.com/downloads/en/DeviceDoc/20001203W.pdf))
-- 1x 74HCT32 OR Gate  ([Jameco](https://www.jameco.com/webapp/wcs/stores/servlet/ProductDisplay?storeId=10001&langId=-1&catalogId=10001&pa=913299&productId=913299), [Datasheet](https://www.jameco.com/Jameco/Products/ProdDS/913299.pdf))
-- 1x 8-bit DIP switch ([Jameco](https://www.jameco.com/z/206-8-JVP-Jameco-ValuePro-8-Position-DIP-Switch-Standard-Raised-Slide-SPST-DIP-16_38842.html)).
-- 4x  74HCT245, Octal Bus Transceivers With 3-State Outputs, ([Digikey](https://www.digikey.com/en/products/detail/texas-instruments/CD74HCT245E/38454), [Datasheet](https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Fcd74hc245)).
-- 74HCT00 Quadruple 2-Input Positive-Nand Gates ([Digikey](https://www.digikey.com/en/products/detail/texas-instruments/SN74HCT00N/277249), [Datasheet](https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Fsn74hct00))
-- 74HCT08 QUAD 2-INPUT POSITIVE AND GATE ([Jameco](https://www.jameco.com/webapp/wcs/stores/servlet/ProductDisplay?langId=-1&storeId=10001&catalogId=10001&productId=44901), [Datasheet](https://www.jameco.com/Jameco/Products/ProdDS/44901FSC.pdf))
+1x UM61512AK ([Datasheet](http://www.allcomponents.ru/umc/um61512ak15.htm))
+
+1x X28C256 32K x 8-bit EEPROM ([Datasheet](https://ww1.microchip.com/downloads/en/DeviceDoc/20001203W.pdf))
+
+3x 8-bit DIP switch ([Jameco](https://www.jameco.com/z/206-8-JVP-Jameco-ValuePro-8-Position-DIP-Switch-Standard-Raised-Slide-SPST-DIP-16_38842.html)).
+
+8x  74HCT245, Octal Bus Transceivers With 3-State Outputs, ([Digikey](https://www.digikey.com/en/products/detail/texas-instruments/CD74HCT245E/38454), [Datasheet](https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Fcd74hc245))
+
+2x 74HCT574, 8-bit Octal D-Type Flip-Flop, 3-State ([Digikey](https://www.digikey.com/en/products/detail/texas-instruments/CD74HCT574E/38721), [Datasheet](https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Fcd74hct374))
+
+3x 74HCT00 Quadruple 2-Input Positive-Nand Gates ([Digikey](https://www.digikey.com/en/products/detail/texas-instruments/SN74HCT00N/277249), [Datasheet](https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Fsn74hct00))
+
+1x 74HCT08 QUAD 2-INPUT POSITIVE AND GATE ([Jameco](https://www.jameco.com/webapp/wcs/stores/servlet/ProductDisplay?langId=-1&storeId=10001&catalogId=10001&productId=44901), [Datasheet](https://www.jameco.com/Jameco/Products/ProdDS/44901FSC.pdf))

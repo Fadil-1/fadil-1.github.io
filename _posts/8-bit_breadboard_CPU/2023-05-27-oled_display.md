@@ -4,7 +4,7 @@ title: OLED
 mathjax: true
 similar: 8-bit-computers
 date_child: "May 27, 2023"
-last_updated: "April 28, 2026"
+last_updated: "May 1, 2026"
 category: children
 parent: 8-bit_breadboard_CPU
 permalink: /blog/8-bit_breadboard_CPU/oled_display/ 
@@ -15,12 +15,14 @@ permalink: /blog/8-bit_breadboard_CPU/oled_display/
 
 # BASICS PRIMER
 <div class="grey-background">
-<p>Unlike traditional LCD (Liquid Crystal Displays), which rely on a uniform backlight, each pixel in an OLED(Organic Light-Emitting Diode) display emits its own light. This makes color contrasts look very vibrant. Typically, LCDs used for minimal projects, such as the HD44780 based LCD2004, have convenient built-in features such as "auto increment after read/write". On these LCDs, characters and symbols can be placed at pre-encoded dot-matrix blocks within the display.</p>
+<p>Unlike traditional LCD (Liquid Crystal Displays), which rely on a uniform backlight, each pixel in an OLED (Organic Light-Emitting Diode) display emits its own light. This makes color contrasts look very vibrant. Typically, LCDs used for minimal projects, such as the HD44780 based LCD2004, have convenient built-in features such as "auto increment after read/write". On these LCDs, characters and symbols can be placed at pre-encoded dot-matrix blocks within the display.</p>
 
-<p>On the other hand, similarly-sized OLED displays are controlled on a pixel-base. While this offers more control over each pixel, it also introduces greater complexity in programming and control as each pixel must be addressed and manipulated independently, which can be more challenging and time-consuming.</p>
+<p>On the other hand, similarly-sized OLED displays are controlled on a pixel basis. While this offers more control over each pixel, it also introduces greater complexity in programming and control as each pixel must be addressed and manipulated independently, which can be more challenging and time-consuming.</p>
 </div>
 
-I use the Adafruit 2.7" Monochrome 128x64 OLED Display Module. It has both SPI and 8-bit parallel mode(6800 and 8080). Since my build is relatively slow(At least compared to commercial MCUs), I use the parallel mode; 6800 specifically since it’s simpler and more common than 8080. The display is driven by the Solomon Systech [SSD1325](http://www.adafruit.com/datasheets/SSD1325.pdf) OLED driver and uses 3V logic HIGH, so I use some level shifters to step down the 5V voltage coming from other parts of the CPU into the displays' 3V input pins. The LOW input(3.3V) of the level shifters comes from a very convenient 3.3V output from the SD card reader.
+I use the Adafruit 2.7" Monochrome 128x64 OLED display module. It has both SPI and 8-bit parallel modes (6800 and 8080). Since my build is relatively slow (at least compared to commercial MCUs), I use the parallel mode; 6800 specifically since it’s simpler and more common than 8080. The display is driven by the Solomon Systech [SSD1325](http://www.adafruit.com/datasheets/SSD1325.pdf) OLED driver and uses 3V logic HIGH, so I use some level shifters to step down the 5V voltage coming from other parts of the CPU into the display's 3V input pins. 
+
+*In the first version of this module, I was using the 3.3V output from the SD card reader, and it worked. But I once probed that rail and found that it was much lower than expected, around 2V, so I replaced it with a dedicated 5V-to-3.3V regulator module just to be an the safe side.*
 
 # Implementation
 
@@ -33,14 +35,17 @@ Below's an image of the OLED display module:
 <br>
 
 ## **Control/Pins lines involved (10):**
-- \|← Pin 4 - **~OS** (**data/command selector pin)**.  A LOW in OS corresponds to a COMMAND read/write and a HIGH OS indicates a DATA read/write.
-- \|← Pin 5 - **OD** (**Data/Write control pin**).
-- \|← Pin 6 - **~OE** (**Enable/Latch control pin**).
-- →\|← Pin 7 to 14 - **D0** (**Data pin 0 to 7**)
-- \|← Pin 15 - **CS** (**Active Low Chip Select pin,** always tied to ground).
-- \|← Pin 16 - **OC** (Clear/Reset pin).
 
-**~OE** is the data latch trigger when **OD** is LOW, with data being latched at the falling edge of **~OE**. Note from the schematic that **OD** is tied to the "direction" pin of the bus transceiver. This means that, unless data is being read from the display(in other words the display is outputting to the data bus), the bus transceiver is always going to direct data from the data bus to the display. And the display always sensing the content of the bus is not an issue because it does not latch any data unless **~OE** gets asserted.
+- \|← Pin 4 - **~OS** (**data/command selector pin**). A LOW on this line selects command writes, and a HIGH selects display data writes.
+- \|← Pin 5 - **OD** (**read/write control pin**). In my normal OLED write path, this line selects write mode.
+- \|← Pin 6 - **OE** (**OLED enable/strobe pin**).
+- →\|← Pin 7 to 14 - **D0-D7** (**8-bit data bus pins**).
+- \|← Pin 15 - **CS** (**active-low chip select pin**, tied to ground in this build).
+- \|← Pin 16 - **OC** (**clear/reset pin**).
+
+**OE** is the OLED enable/strobe. During a write, **OD** selects write mode, **~OS** selects whether the byte is interpreted as a command or display data, the CPU places the byte on D0-D7, and **OE** is pulsed to complete the transfer.
+
+**OD** is also tied to the direction pin of the bus transceiver. Since the CPU mostly writes *into* the display, the transceiver usually points from the CPU data bus toward the OLED module. So the display may see the current bus value, but it does not treat that value as a completed transfer until the enable timing occurs.
 
 <figure>
     <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/oled/1.jpg" alt="Figure 2: Control pins of 6800 interface - Solomon Systech">
@@ -55,20 +60,43 @@ To understand how commands are sent to the display, let's first go through the c
 
 ## Command Format
 
-The OLED display's controller uses a combination of command and data bytes to control its operation. The commands are used as follows:
+The OLED controller separates command writes from display-data writes using the data/command selector line.
 
-1. **Setting the ~OS Pin**: As mentioned before, this pin determines whether the byte being sent is a command (~OS = 0) or data (~OS = 1).
-2. **Sending the Command Byte**: This is the first byte sent after setting the ~OS pin to 0. It typically consists of a unique pattern that identifies the command, as outlined in the datasheet.
-3. **Sending Additional Bytes (if required)**: Some commands require additional data bytes to complete the command. These bytes follow the command byte.
+On my CPU, that distinction is made through two OLED instructions:
 
-For example, to set the column address:
+```asm
+OLC value   ; send value as an OLED command/control byte
+OLD value   ; send value as OLED display data
+```
 
-- First, send the command byte `0b00010101` (Hex 15). This tells the OLED to prepare to receive the column address settings.
-- Then send the column start address, e.g., `0b00000000` for starting at column 0.
-- Finally, send the column end address, e.g., `0b00111111` for ending at column 63.
+`OLC` is used for controller commands and command parameters, such as setting the column window, row window, remap mode, contrast, or display state.
 
 
-Address are simply latched after setting ~OS = 1.
+`OLD` is used when writing actual pixel data into GDDRAM.
+
+For example, to set the column address window:
+
+* Send `0x15` with `OLC`. This is the SSD1325 command for setting the column address.
+* Send the start column, such as `0x00`, with `OLC`.
+* Send the end column, such as `0x3F`, with `OLC`.
+
+After the row and column window are set, the CPU can send the GDDRAM write command and then stream pixel bytes through the data path. In that case, command/control bytes still use `OLC`, while pixel bytes use `OLD`.
+
+## CPU-Level OLED Instructions
+
+The OLED hardware interface is controlled through a small set of CPU instructions:
+
+```asm
+OLR        ; reset / clear the OLED interface
+OLC value  ; send value as a command/control byte
+OLD value  ; send value as display data
+```
+
+`OLC` and `OLD` hide the low-level control-line sequencing from normal assembly programs. At the hardware level, the CPU still drives the 8-bit OLED data bus, selects command or data mode, and pulses the OLED enable line. At the assembly level, this becomes a simple distinction between command/control transfers and display-data transfers.
+
+The higher-level OLED text and monitor code builds on top of these low-level instructions. This page focuses on the display hardware and initialization sequence.
+
+
 <figure>
     <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/oled/2.png" alt="Figure 3: command_table - Solomon Systech">
     <figcaption>Figure 3: command_table - Solomon Systech</figcaption>
@@ -82,7 +110,9 @@ On page 6 of the SSD1325 datasheet:<br>
 
 This means that by default, the SSD1325 expects to interact with a 128x80 display. Since the display I use is a 128x64, the start and end GDDRAM addresses must be adjusted accordingly.
 
-The SSD1325 operates with a 4-bit grayscale depth, meaning that it uses 4 bits to represent one of 16 different shades of gray for each pixel. In the controller's GDDRAM, which is a bitmapped static RAM holding the bit pattern to be displayed, the data is organized such that each byte corresponds to two pixels. When data is written to the GDDRAM, the lower and higher nibbles of each data byte represent the grayscale levels for two consecutive pixels. This design choice optimizes the memory layout of the display while maintaining the mechanical flexibility to remap the display through software as needed. Note that because a pixel only requires a nibble; a page/buffer for the display is actually 64x64 bytes instead of 128x64.
+The SSD1325 uses 4-bit grayscale pixels, so each pixel is represented by one nibble. A single byte written to GDDRAM therefore contains two horizontal pixels. With the remap setting used in my current initialization sequence, the left pixel is stored in the high nibble and the right pixel is stored in the low nibble.
+
+Because two pixels fit in one byte, a full 128x64 image occupies 64 bytes per row for 64 rows, or 4096 bytes total. This is why OLED drawing code has to think in packed pixel pairs rather than one byte per pixel.
 
 The datasheet also describes the "Set Re-map" command (A0h), which lets you configure the pointer position, as well as the orientation and progression of data within the display's memory for standard top-left to bottom-right rendering of images and text. This is very handy for customizing the display to match specific writing/drawing requirements.
 
@@ -164,3 +194,13 @@ The initialization sequence below, among many things, mainly clears any residual
 
 **14- Turn the Display ON**:
 - Send `0b10101111` / `0xAF` (command to turn on the display).
+
+## ICs
+
+1x Adafruit 2.7" Monochrome 128x64 OLED Graphic Display Module Kit ([Adafruit](https://www.adafruit.com/product/2674), [SSD1325 OLED driver's datasheet](https://cdn-shop.adafruit.com/datasheets/SSD1325.pdf))
+
+2x TXS0108E 8-bit bidirectional level-shifter modules ([Amazon](https://www.amazon.com/dp/B07BNYVJBB), [Datasheet](https://www.ti.com/lit/gpn/TXS0108E))
+
+1x 74HCT245, Octal Bus Transceivers With 3-State Outputs, ([Digikey](https://www.digikey.com/en/products/detail/texas-instruments/CD74HCT245E/38454), [Datasheet](https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Fcd74hc245))
+
+1x AMS1117-3.3 5V-to-3.3V regulator module ([Amazon](https://www.amazon.com/Anmbest-AMS1117-3-3-4-75V-12V-Voltage-Regulator/dp/B07CP4P5XJ/))

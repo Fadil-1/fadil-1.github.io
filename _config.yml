@@ -2,7 +2,7 @@
 title: "" # your site title
 author: "" # You :P
 description: > # Meta description of Homepage
-  Hi, I'm Fadil. This is my personal blog, where I keep notes, and technical explanations for things I'm working on or trying to understand better.
+  Hi, I’m Fadil. This is my personal blog for writeups and ideas I want to keep in one place.
 baseurl: "" # My base url: Must match my repo name.
 url: "https://Fadil-1.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 
@@ -10,7 +10,8 @@ permalink: /:categories/:year/:month/:day/:title/ # Structures projects in _post
 
 
 github: https://github.com/Fadil-1 
-linkedin: https://www.linkedin.com/in/fadil-isamotu-b2b0241a1/
+linkedin: www.linkedin.com/in/fadil-isamotu-b2b0241a1
+youtube: https://www.youtube.com/@fadilisamotu9695
 
 favicon: 376843.png
 # THEME SETTINGS

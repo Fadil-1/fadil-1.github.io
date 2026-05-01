@@ -525,8 +525,8 @@ void loop() {
 
 # Parts and Tools
 
-- 1x 74HC595 8-bit shift register with 3-state output register ([Digikey](https://www.digikey.com/en/products/detail/texas-instruments/SN74HC595N/277246), [Datasheet](https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Fsn74hc595))
+1x 74HC595 8-bit shift register with 3-state output register ([Digikey](https://www.digikey.com/en/products/detail/texas-instruments/SN74HC595N/277246), [Datasheet](https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Fsn74hc595))
 
-- 1x ELEGOO Nano Board CH340/ATmega328P, Arduino Nano-compatible, without USB cable ([Amazon](https://www.amazon.com/ELEGOO-Arduino-ATmega328P-Without-Compatible/dp/B0713XK923?th=1))
+1x ELEGOO Nano Board CH340/ATmega328P, Arduino Nano-compatible, without USB cable ([Amazon](https://www.amazon.com/ELEGOO-Arduino-ATmega328P-Without-Compatible/dp/B0713XK923?th=1))
 
-- 1x GQ-4X4 USB universal programmer with ADP-054 16-bit EPROM adapter ([Amazon](https://www.amazon.com/PRG-112-GQ-universal-programmer-Adapter/dp/B01212KD74), [MCUmall](https://www.mcumall.com/store/index.php?product_id=85&route=product%2Fproduct))
+1x GQ-4X4 USB universal programmer with ADP-054 16-bit EPROM adapter ([Amazon](https://www.amazon.com/PRG-112-GQ-universal-programmer-Adapter/dp/B01212KD74), [MCUmall](https://www.mcumall.com/store/index.php?product_id=85&route=product%2Fproduct))
