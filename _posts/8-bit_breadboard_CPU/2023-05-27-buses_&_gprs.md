@@ -4,6 +4,7 @@ title: Buses & General Purpose Registers
 mathjax: true
 similar: 8-bit-computers
 date_child: "May 27, 2023"
+last_updated: "April 28, 2026"
 category: children
 parent: 8-bit_breadboard_CPU
 permalink: /blog/8-bit_breadboard_CPU/buses_&_gprs/ 
@@ -17,24 +18,24 @@ permalink: /blog/8-bit_breadboard_CPU/buses_&_gprs/
 
 <div class="grey-background">
 
-An N-bit register is made of N flip-flops that are all linked to the same CLK input, allowing all bits to change at once. 
+An N-bit register is made of N flip-flops linked to the same CLK input, so all bits change at once.
 
-Generally speaking, when a processor is described as an “N-bit processor”, it means that it can handle N bits of data(words) in a single instruction cycle, and N is typically the size/width of the processor's data bus.
+Generally speaking, when a processor is described as an "N-bit processor", it means it handles N bits of data (words) in a single instruction cycle. N is typically the width of the processor's data bus.
 
-It is crucial for only one component to send data(write) to the bus at a time to prevent bus contention and ensure smooth, error-free data transfer. If more than one component try to send data at the same time, it can lead to errors and loss of information.
+Only one component should drive the bus at a time. If two outputs drive the same bus at once, they can "fight" each other electrically, which can corrupt data and potentially stress the output drivers.
 
-On the other hand, multiple components can read data from the bus at the same time, they’d just be “sensing” information from the bus instead of concurrently asserting voltage on it.
+On the other hand, multiple components can read data from the bus at the same time. They would simply be "sensing" information from the bus instead of concurrently asserting voltage on it.
 </div>
 
-As  mentioned in the overview, my  build has an 8-bit data bus, and a 16-bit system/memory bus. "data bus" is somewhat of a misnomer given that all computer buses are involved in moving some form of data among various components and peripherals. In the context of this CPU, the data bus is used to transfer some control signals, memory locations(addresses) and I/O data, while the memory bus only deals with memory locations.
+As mentioned in the overview, my build has an 8-bit data bus and a 16-bit system/memory bus. The name "data bus" is somewhat loose, since all computer buses carry data of some kind. In this build, I use "data bus" to refer to the 8-bit bus that carries register values, instruction operands, memory data, and I/O data. The 16-bit system/memory bus carries addresses and connects the CPU to memory-related modules.
 
-The use of a 16-bit address bus, which is explained in more details in the RAM post is an enhancement to the memory capacity without making the design overly complex. In simple terms, a 16-bit address bus allows the CPU to access a larger memory space compared to an 8-bit address bus. With 16 bits, the CPU can address up to 65,536 ($2^{16}$) individual memory locations, offering ample space to store and retrieve data and instructions.
+The 16-bit address bus, explained in more detail in the RAM post, is an enhancement to the memory capacity without making the design overly complex. In simple terms, a 16-bit address bus allows the CPU to access a larger memory space compared to an 8-bit address bus. With 16 bits, the CPU can address up to 65,536 ($2^{16}$) individual memory locations, which provides ample space to store and retrieve data and instructions.
 
-My build contains 5 general purpose registers (GPRs) A, B, C, D, and E; E being a partial GPR. All GPRs can read from and write to the 8-bit data bus. Four of them are dual 74HCT173(173) which I had assembled when initially building the SAP-1, and the last one is a  74HCT574(574).
+My build contains five general-purpose registers (GPRs): A, B, C, D, and E, though register E supports only a limited set of instructions. All GPRs can read from and write to the 8-bit data bus. Four of them are dual 74HCT173(173) which I had assembled when initially building the SAP-1, and the last one is a  74HCT574(574).
 
 # Implementation
 
-The 173 is a 4-bit register, therefore a pair is used with common control pins, to form a single 8-bit register. Although all of the GPRs are tri-sate, a 74HCT245 transceiver is used between the outputs of the 173s and the bus. This configuration allows for LEDs to display the content of the registers without causing interference on the bus. So essentially the bus transceivers serve as a final output-enable to the bus while the registers themselves are always outputting their content. 
+The 173 is a 4-bit register, so two chips share common control pins to make a single 8-bit register. Although the 173s have tri-state outputs, their outputs remain active so the register contents can appear on LEDs. A 74HCT245 transceiver sits between the 173s and the bus and makes the final output enable, which prevents the LEDs and register outputs from interfering with bus activity.
 
 | Pin No | Pin Name | Description |
 | --- | --- | --- |
@@ -45,7 +46,7 @@ The 173 is a 4-bit register, therefore a pair is used with common control pins, 
 | 19 | ~E | Active Low Input Enable Pin |
 | 20 | VCC | Chip Supply Voltage |
 
-Table 1: 74HCT173 Pin Configuration
+Table 1: 74HCT245 Octal Bus Transceivers, Pin Configuration
 
 <figure>
     <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/buses_&_gprs/1.png" alt="Figure 1: 74HCT173-based General Purpose Register">
@@ -66,26 +67,26 @@ Table 1: 74HCT173 Pin Configuration
 | 15 | MR | Master Reset Input |
 | 16 | VCC | Chip Supply Voltage |
 
-Table 2 74HCT245 Octal Bus Transceivers, Pin Configuration
+Table 2: 74HCT173 Pin Configuration
 
-As can be seen, unlike the 74HCT173, the 74HCT574 does not have an enable pin. By default, the clock pin **CP** serves both as an enable and clock input pin, which means that at every rising clock edge, whatever appears on the data pins of the register would overwrite its content. This is obviously an undesired behavior. To solve this I simply AND the clock with the “write” control line for each 574, so that the register gets loaded/overwritten only when a “write” operation is asserted.
+Unlike the 74HCT173, the 74HCT574 does not have a data-enable input. Its output-enable pin controls whether the stored value appears at the outputs, but it does not prevent the register from loading new data on a rising clock edge. By default, the clock pin **CP** acts as both an enable and a clock input. This means at every rising clock edge, whatever appears on the data pins overwrites the register's content. To avoid this, I AND the clock with the “write” control line for each 574, so the register only loads during a write operation.
 
 
 <figure>
     <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/buses_&_gprs/2.png" alt="Figure 2: 74HCT574-based General Purpose Register(With Transceiver)">
-    <figcaption>Figure 2: 74HCT574-based General Purpose Register(With Transceiver)</figcaption>
+    <figcaption>Figure 2: 74HCT574-based General Purpose Register (With Transceiver)</figcaption>
 </figure>
 
 <br>
 
 
 
-Unlike some other 8-bit register ICs with built-in gated enable, The 74HCT574 has a very clean pin layout: All inputs and outputs are aligned on opposite sides of the IC, which makes it very breadboard-friendly, just like the 74HCT173. Some of the 574s in my build are used without a transceiver due to space constraints on the breadboards.
+Unlike some other 8-bit register ICs with built-in gated enables, the 74HCT574 has a very clean pin layout: All inputs and outputs are aligned on opposite sides of the IC, which makes it very breadboard-friendly, just like the 74HCT173. Some of the 574s in my build are used without a transceiver due to space constraints on the breadboards.
 
 
 <figure>
     <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/buses_&_gprs/3.png" alt="Figure 3: 74HCT574-based General Purpose Register(Without Transceiver)">
-    <figcaption>Figure 3: 74HCT574-based General Purpose Register(Without Transceiver)</figcaption>
+    <figcaption>Figure 3: 74HCT574-based General Purpose Register (Without Transceiver)</figcaption>
 </figure>
 
 <br>
@@ -98,7 +99,6 @@ Unlike some other 8-bit register ICs with built-in gated enable, The 74HCT574 ha
 | 10 | GND | Ground Pin |
 | 11 | CP | Clock Pulse Input |
 | 12, 13, 14, 15, 16, 17, 18, 19 | O0, O1, O2, O3, O4, O5, O6, O7 | Tristate Output Pin 0, 1, 2, 3, 4, 5, 6, 7 |
-| 19 | ~E | Active Low Input Enable Pin |
 | 20 | VCC | Chip Supply Voltage |
 
 Table 3: 74HCT574 8-bit Octal D-Type Flip-Flop Pin Configuration
@@ -110,13 +110,3 @@ Table 3: 74HCT574 8-bit Octal D-Type Flip-Flop Pin Configuration
 1x 74HCT574, 8-bit Octal D-Type Flip-Flop, 3-State ([Digikey](https://www.digikey.com/en/products/detail/texas-instruments/CD74HCT574E/38721), [Datasheet](https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Fcd74hct374))
 
 4x 74HCT245, Octal Bus Transceivers With 3-State Outputs, ([Digikey](https://www.digikey.com/en/products/detail/texas-instruments/CD74HCT245E/38454), [Datasheet](https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Fcd74hc245))
-
-
-<br>
-
-[**<<<<<<<<<<<<<<<<<<<< Previous Post:  Permanent Clock**]({{ site.baseurl }}{% link _posts/8-bit_breadboard_CPU/2023-05-27-permanent_clock.md %})
-
-
-<a href="{{ site.baseurl }}{% link _posts/8-bit_breadboard_CPU/2023-05-27-alu_primer.md %}"><span class="wide-space"></span><span class="wide-space"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Next Post: ALU Primer     >>>>>>>>>>>>>>>>>>>>**</a>
-
-<i class="fas fa-calendar-alt"></i> <span style="font-size: 15px; font-weight: bolder;">Updated:  </span><time>May 21, 2024</time>

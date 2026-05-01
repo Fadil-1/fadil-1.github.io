@@ -1,7 +1,7 @@
 ---
 layout: 8-bit_breadboard_CPU
 title: 8-bit Breadboard CPU
-featured-img: 8-bit_bb_cpu.jpeg
+featured-img: 8-bit_bb_cpu.jpg
 mathjax: true
 overview: Table of Contents
 date_parent: "May 27, 2023"
@@ -13,9 +13,9 @@ summary: Enhanced version of Ben Eater's 8-bit breadboard computer.
 parent_nav:
   - name: 🤔 Overview
     permalink: /blog/8-bit_breadboard_CPU/overview/
-  - name: Nomenclatures
+  - name: Nomenclature
     icon: /assets/img/icons/posts/krename.png 
-    permalink: /blog/8-bit_breadboard_CPU/nomenclatures/
+    permalink: /blog/8-bit_breadboard_CPU/nomenclature/
   - name: " ⛰️\u00A0\u00A0Basics"
     permalink: /blog/8-bit_breadboard_CPU/basics/
   - type: space
@@ -34,7 +34,7 @@ parent_nav:
   - type: line
   - category: ➗ ALU
   - name: "\u00A0\u00A0\u00A0\u00A0ALU Primer"
-    permalink: /blog/8-bit_breadboard_CPU/alu_primer
+    permalink: /blog/8-bit_breadboard_CPU/alu_primer/
   - name: "\u00A0\u00A0\u00A0\u00A0ALU & Flags"
     permalink: /blog/8-bit_breadboard_CPU/alu_&_flags/
   - type: line
@@ -50,20 +50,20 @@ parent_nav:
     permalink: /blog/8-bit_breadboard_CPU/eprom_programmer/
   - name: Numerical Display
     icon: /assets/img/icons/posts/segmented_display.png
-    permalink: /blog/8-bit_breadboard_CPU/numerical_display
+    permalink: /blog/8-bit_breadboard_CPU/numerical_display/
   - name: "\u00A0 ↕️ \u00A0PC & Stack Pointer"
     permalink: /blog/8-bit_breadboard_CPU/pc_&_sp/
   - type: line
   - category: Control
     icon: /assets/img/icons/posts/cu.png
   - name: "\u00A0\u00A0\u00A0\u00A0Control Unit & IR"
-    permalink: /blog/8-bit_breadboard_CPU/cu_&_ir
+    permalink: /blog/8-bit_breadboard_CPU/cu_&_ir/
   - name: "\u00A0\u00A0\u00A0\u00A0Assembly"
-    permalink: /blog/8-bit_breadboard_CPU/assembly
+    permalink: /blog/8-bit_breadboard_CPU/assembly/
   - name: "\u00A0\u00A0\u00A0\u00A0Microcode Generator"
-    permalink: /blog/8-bit_breadboard_CPU/microcode_generator
+    permalink: /blog/8-bit_breadboard_CPU/microcode_generator/
   - name: "\u00A0\u00A0\u00A0\u00A0Instructions"
-    permalink: /blog/8-bit_breadboard_CPU/instructions
+    permalink: /blog/8-bit_breadboard_CPU/instructions/
   - name: "\u00A0⚫ \u00A0OLED"
     permalink: /blog/8-bit_breadboard_CPU/oled_display/
 ---

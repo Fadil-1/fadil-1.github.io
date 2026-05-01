@@ -65,7 +65,77 @@ layout: compress
     <article>
       <div class="content-container">
         <!-- Main content goes here -->
+        {% if page.date_child or page.last_updated %}
+          <div class="cpu-post-metadata">
+            {% if page.date_child %}
+              <span class="cpu-post-metadata__item">
+                <i class="fas fa-calendar-alt"></i>
+                <span class="cpu-post-metadata__label">Posted:</span>
+                <time>{{ page.date_child }}</time>
+              </span>
+            {% endif %}
+
+            {% if page.date_child and page.last_updated %}
+              <span class="cpu-post-metadata__separator">|</span>
+            {% endif %}
+
+            {% if page.last_updated %}
+              <span class="cpu-post-metadata__item">
+                <i class="fas fa-pen"></i>
+                <span class="cpu-post-metadata__label">Last updated:</span>
+                <time>{{ page.last_updated }}</time>
+              </span>
+            {% endif %}
+          </div>
+        {% endif %}
         {{ content }}
+        {% assign cpu_previous_name = "" %}
+        {% assign cpu_previous_permalink = "" %}
+        {% assign cpu_next_name = "" %}
+        {% assign cpu_next_permalink = "" %}
+        {% assign previous_cpu_name = "" %}
+        {% assign previous_cpu_permalink = "" %}
+        {% assign found_current_cpu_page = false %}
+
+        {% for items in site.posts %}
+          {% if items.similar == "8-bit_breadboard_CPU" and items.category == "parent" %}
+            {% for i in items.parent_nav %}
+              {% unless i.type == 'line' or i.type == 'space' or i.category %}
+                {% if found_current_cpu_page and cpu_next_name == "" %}
+                  {% assign cpu_next_name = i.name %}
+                  {% assign cpu_next_permalink = i.permalink %}
+                {% endif %}
+
+                {% if i.permalink == page.url %}
+                  {% assign cpu_previous_name = previous_cpu_name %}
+                  {% assign cpu_previous_permalink = previous_cpu_permalink %}
+                  {% assign found_current_cpu_page = true %}
+                {% endif %}
+
+                {% assign previous_cpu_name = i.name %}
+                {% assign previous_cpu_permalink = i.permalink %}
+              {% endunless %}
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+
+        {% if cpu_previous_name != "" or cpu_next_name != "" %}
+          <nav class="cpu-post-nav" aria-label="CPU article navigation">
+            {% if cpu_previous_name != "" %}
+              <a class="cpu-post-nav__link cpu-post-nav__link--previous" href="{{ cpu_previous_permalink | relative_url }}">
+                <span class="cpu-post-nav__direction">Previous Post</span>
+                <span class="cpu-post-nav__title">‹ {{ cpu_previous_name }}</span>
+              </a>
+            {% endif %}
+
+            {% if cpu_next_name != "" %}
+              <a class="cpu-post-nav__link cpu-post-nav__link--next" href="{{ cpu_next_permalink | relative_url }}">
+                <span class="cpu-post-nav__direction">Next Post</span>
+                <span class="cpu-post-nav__title">{{ cpu_next_name }} ›</span>
+              </a>
+            {% endif %}
+          </nav>
+        {% endif %}
       </div>
       <!-- Additional content if needed -->
       {% for items in site.posts %}

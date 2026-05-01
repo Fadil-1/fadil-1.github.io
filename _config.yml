@@ -2,11 +2,7 @@
 title: "" # your site title
 author: "" # You :P
 description: > # Meta description of Homepage
-  Hello, I'm Fadil. 
-  I'm a Master's CS student at the Johns Hopkins University. This is my blog. 
-  I'm planning to post projects that I've undertaken along with tutorial-like documentation here. 
-  I'm always eager to connect, so if you'd like to discuss projects, share ideas, or simply say hello,
-  feel free to reach out! Connect with me on LinkedIn and GitHub (links in the footer), or send me an email through the "Contact" section.
+  Hi, I'm Fadil. This is my personal blog, where I keep notes, and technical explanations for things I'm working on or trying to understand better.
 baseurl: "" # My base url: Must match my repo name.
 url: "https://Fadil-1.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 

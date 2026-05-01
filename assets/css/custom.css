@@ -954,6 +954,15 @@ footer{
   border-radius: 5px;
 }
 
+.grey-background p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.grey-background p:last-child {
+  margin-bottom: 0;
+}
+
   /* Basic Flexbox Layout for Sidebar and Content */
 .container-main {
   width: 100%;
@@ -995,7 +1004,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Keep the project navigation scoped to the sidebar container. */
+/* Keeps the project navigation scoped to the sidebar container. */
 .container-main.cpu-page .underline-flex {
   position: static !important;
   width: auto !important;
@@ -1004,6 +1013,84 @@ body {
   margin-left: 0 !important;
   padding-top: 0 !important;
   overflow-x: hidden;
+}
+
+.container-main.cpu-page .cpu-post-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 28px 0;
+  font-size: 15px;
+  color: rgb(70, 70, 70);
+}
+
+.container-main.cpu-page .cpu-post-metadata__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.container-main.cpu-page .cpu-post-metadata__label {
+  font-weight: 700;
+}
+
+.container-main.cpu-page .cpu-post-metadata__separator {
+  color: rgb(140, 140, 140);
+}
+
+.container-main.cpu-page .cpu-post-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 52px 0 28px 0;
+  padding-top: 24px;
+  border-top: 1px solid #ededed;
+}
+
+.container-main.cpu-page .cpu-post-nav__link {
+  display: flex;
+  flex-direction: column;
+  max-width: 48%;
+  color: rgb(70, 70, 70);
+  text-decoration: none !important;
+  border-bottom: 0 !important;
+}
+
+.container-main.cpu-page .cpu-post-nav__link--next {
+  margin-left: auto;
+  text-align: right;
+}
+
+.container-main.cpu-page .cpu-post-nav__direction {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgb(120, 120, 120);
+}
+
+.container-main.cpu-page .cpu-post-nav__title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.container-main.cpu-page .cpu-post-nav__link:hover .cpu-post-nav__title {
+  color: rgb(0, 0, 0);
+}
+
+@media screen and (max-width: 700px) {
+  .container-main.cpu-page .cpu-post-nav {
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .container-main.cpu-page .cpu-post-nav__link {
+    max-width: 100%;
+  }
+
+  .container-main.cpu-page .cpu-post-nav__link--next {
+    margin-left: 0;
+    text-align: left;
+  }
 }
 
 /* Desktop layout */
@@ -1185,6 +1272,20 @@ body {
   border-collapse: collapse;
 }
 
+.container-main.cpu-page .content-container table th,
+.container-main.cpu-page .content-container table td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.container-main.cpu-page .content-container table.table-left th,
+.container-main.cpu-page .content-container table.table-left td,
+.container-main.cpu-page .content-container .table-left table th,
+.container-main.cpu-page .content-container .table-left table td {
+  text-align: left;
+  vertical-align: top;
+}
+
 .container-main.cpu-page .content-container pre {
   max-width: 100%;
   overflow-x: auto;
@@ -1192,4 +1293,27 @@ body {
 
 .container-main.cpu-page .content-container code {
   overflow-wrap: anywhere;
+}
+
+/* Custom block for MathJax equations to mimic native code blocks */
+.math-code-block {
+  background-color: #f8f8f8;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  color: #25292e;
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 1.1rem;
+  line-height: 1.55;
+  padding: 14px 16px;
+  margin: 0 0 16px 0;
+  overflow-x: auto;
+}
+
+.math-code-block p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.math-code-block p:last-child {
+  margin-bottom: 0;
 }
