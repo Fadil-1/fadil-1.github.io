@@ -121,7 +121,7 @@ This is why the control unit can address more named control outputs than the 48 
 Many signals in the CPU are active-low. In the microcode definitions, I still write a control word as if asserting a named signal means "activate this function." Before writing the ROM files, the script normalizes active-low signals so inactive active-low lines are stored as HIGH in the EPROM output.
 
 ```python
-active_low_lines = _CLKW | _DW | _BW | _HC | _FW | _OE | _OS | _OC | _ScR | \
+active_low_lines = _CLKW | _DW | _BW | _HC | _FW | _OS | _OC | _ScR | \
 _PChE | _PClE | _EE | _PSE | _PSW | _SPC | _SPE | _MW | \
 _BRE | _PCE | _PCW | _PS
 
