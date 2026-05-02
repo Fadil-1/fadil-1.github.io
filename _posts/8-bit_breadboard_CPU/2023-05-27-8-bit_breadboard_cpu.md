@@ -66,4 +66,14 @@ parent_nav:
     permalink: /blog/8-bit_breadboard_CPU/instructions/
   - name: "\u00A0⚫ \u00A0OLED"
     permalink: /blog/8-bit_breadboard_CPU/oled_display/
+  - type: space
+  - type: line
+  - category: "🕵️ SPI and SD Card"
+  - name: "\u00A0\u00A0\u00A0\u00A0SPI & SD Primer"
+    permalink: /blog/8-bit_breadboard_CPU/spi_sd_primer/
+  - name: "\u00A0\u00A0\u00A0\u00A0SPI & Port Selector"
+    permalink: /blog/8-bit_breadboard_CPU/spi_and_port_selector_modules/
+  - name: "\u00A0\u00A0\u00A0\u00A0SD Bootstrap"
+    permalink: /blog/8-bit_breadboard_CPU/sd_bootstrap/
+  - type: space
 ---

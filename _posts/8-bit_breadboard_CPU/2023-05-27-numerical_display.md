@@ -283,4 +283,4 @@ This code is also available on my [GitHub](https://github.com/Fadil-1/8-BIT-BREA
 
 1x Common-Cathode 6-digits 14-segment display, ([Alibaba](https://www.alibaba.com/product-detail/6-digits-14-segments-Red-green_60748284169.html))
 
-1x Dual 2-Line To 4-Line Decoders/Demultiplexers ([Digikey](https://www.digikey.com/en/products/detail/texas-instruments/SN74HCT139N/376857), [Datasheet](https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Fsn74hct139))
+1x 74HCT139 Dual 2-Line To 4-Line Decoders/Demultiplexers ([Digikey](https://www.digikey.com/en/products/detail/texas-instruments/SN74HCT139N/376857), [Datasheet](https://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=https%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Fsn74hct139))

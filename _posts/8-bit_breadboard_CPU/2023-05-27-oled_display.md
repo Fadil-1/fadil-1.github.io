@@ -39,7 +39,7 @@ Below's an image of the OLED display module:
 - \|← Pin 4 - **~OS** (**data/command selector pin**). A LOW on this line selects command writes, and a HIGH selects display data writes.
 - \|← Pin 5 - **OD** (**read/write control pin**). In my normal OLED write path, this line selects write mode.
 - \|← Pin 6 - **OE** (**OLED enable/strobe pin**).
-- →\|← Pin 7 to 14 - **D0-D7** (**8-bit data bus pins**).
+- \|←→ Pin 7 to 14 - **D0-D7** (**8-bit data bus pins**).
 - \|← Pin 15 - **CS** (**active-low chip select pin**, tied to ground in this build).
 - \|← Pin 16 - **OC** (**clear/reset pin**).
 
