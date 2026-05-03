@@ -33,7 +33,7 @@ At a high level, the module has three jobs:
    by toggling the output lines one bit at a time.
 ```
 
-This keeps the hardware small. The tradeoff is that every SPI byte requires a software loop.
+The hardware stays small, but the tradeoff is that every SPI byte requires a software loop.
 
 
 # Port Selector
@@ -58,11 +58,11 @@ The port selector is made out of a 4-bit register and a decoder. The register st
 
 `_PS` loads the selected port value into the port selector register. Once the port value is stored, `_PSW` is used when the CPU writes to the selected port, and `_PSE` is used when the selected port drives data back onto the CPU bus.
 
-For the SPI module, the SPI port is selected through this same mechanism. Once the SPI port is selected, writes update the SPI output register, which controls signals such as MOSI, SCLK, SD-card chip select, and BLE chip select. Reads enable the SPI input path, allowing the CPU to read signals such as MISO.
+For the SPI module, the SPI port is selected through this same mechanism. Once the SPI port is selected, writes update the SPI output register, which controls MOSI, SCLK, SD-card chip select, and BLE chip select. Reads enable the SPI input path, so the CPU can read signals such as MISO.
 
-This keeps the SPI hardware separate from the CPU core. The CPU only needs to select the SPI port and then perform a normal input or output operation; the port selector handles which external circuit is connected for that transfer.
+The CPU only needs to select the SPI port and then perform a normal input or output operation; the port selector handles which external circuit is connected for that transfer.
 
-# SPI Signals in This Build
+# SPI Signals
 
 The SPI bus uses the usual SPI signal names:
 
@@ -91,7 +91,7 @@ Chip select is active low for the SD card and BLE module. That means the selecte
 - \|← **_SW**   SPI Write
 - \|← **_SE**   SPI Enable
 
-# Output Side (Driving the SPI Bus)
+# Output Side
 
 The CPU drives the SPI output lines through an output register connected to the data bus. The assembly code writes a value to the SPI port, and each bit of that value controls one SPI line.
 
@@ -104,7 +104,7 @@ bit 2 -> CS_SD
 bit 3 -> CS_BLE
 ```
 
-The exact constant names in the assembly code are used to make this easier to read:
+The exact constant names in assembly are used to make this easier to read:
 
 ```asm
 MOSI        = 0b00000001
@@ -117,7 +117,7 @@ With this mapping, the CPU can set or clear SPI lines by modifying bits in the o
 
 For example, setting SCLK high means ORing the current SPI output value with the SCLK bit. Clearing SCLK means ANDing the current output value with the inverse of the SCLK bit.
 
-# Input Side (Reading MISO)
+# Input Side
 
 MISO is read through the CPU input path. During a read, the CPU samples the SPI input state and extracts MISO from bit 7 of the SPI port value.
 
@@ -181,7 +181,7 @@ repeat 8 times:
     bring SCLK low
 ```
 
-This is bit-banging. The CPU manually creates every SPI clock edge in software.
+**This is bit-banging**: The CPU manually creates every SPI clock edge in software.
 
 The benefit is that the routine is easy to adapt and inspect. The downside is that the maximum SPI speed is limited by the CPU clock and the number of micro-operations needed for each bit.
 
@@ -205,20 +205,7 @@ repeat 8 times:
 
 In SPI, reads still require clocks. For that reason, a read operation often transmits dummy 1s on MOSI while the peripheral shifts useful data back on MISO.
 
-For the SD card, this is especially important. After sending a command, the CPU may have to keep sending dummy clocks until the card produces a response token.
-
-# Why SPI Reads and Writes Share the Same Clock
-
-SPI is full duplex at the wire level. Every clock edge can move one bit in each direction:
-
-```text
-CPU  -> peripheral on MOSI
-CPU  <- peripheral on MISO
-```
-
-In practice, many SD-card operations feel half-duplex from the software point of view. The CPU first sends a command, then waits for a response, then receives a data block. Electrically, though, the clock is still the event that allows bits to move.
-
-This is why the routines treat "read a byte" as an active operation. The CPU is not just passively waiting. It keeps toggling SCLK so the card can shift its response out.
+For the SD card, this is especially important, because after sending a command, the CPU may have to keep sending dummy clocks until the card produces a response token.
 
 # SD-Card Power-Up Clocks
 
@@ -252,11 +239,14 @@ CMD0, CMD8, CMD55, ACMD41, CMD17
 SD block read into RAM
 ```
 
-This separation matters because the SPI layer can be reused for other peripherals. The SD-card layer is specific to SD command frames, response tokens, and 512-byte block reads.
+The SD-card layer sits above that and handles SD-specific details like command frames, and 512-byte block reads.
 
 # Practical Debugging Notes
 
-This module is one of the places where the breadboard nature of the CPU matters a lot. SPI has only a few signals, but each one has timing meaning.
+Although SD-card initialization guidelines usually recommend a startup clock in the `100kHz` to `400kHz` range, <a href="https://www.amazon.com/dp/B07R8GVGN9?ref_=ppx_hzsearch_conn_dt_b_fed_asin_title_7" target="_blank">my card</a> still entered SPI mode at my CPU’s lowest clock speed, around `17kHz`(Which means SCKL was even way slower due to bit banging).
+At that speed, the command sequence and response bytes were much easier to inspect during debugging. I'd sometimes just record the CPU running and watch the registers contents in slow mo. I recommend starting at the slowest clock speed first, confirm that `CMD0` and the initialization sequence behave correctly, and only then increase the clock speed.
+
+For bring-up, I found it useful to test the SPI byte routines first, then the SD command responses, and only then the full block-read path.
 
 Useful signals to check are:
 
@@ -267,15 +257,6 @@ MOSI changes before the rising clock edge.
 MISO is sampled while SCLK is high.
 Inactive SPI devices keep their CS lines high.
 ```
-
-For bring-up, I found it useful to test the SPI byte routines first, then the SD command responses, and only then the full block-read path.
-
-# What This Enables
-
-Once the CPU can send and receive SPI bytes, the SD card becomes reachable. Once the SD card is reachable, the ROM no longer has to contain every large program directly.
-
-The next layer is the SD-card block loader. That code uses the SPI module to initialize the card, read 512-byte sectors, and copy payloads into RAM. The loader eventually supports larger programs that would be inconvenient to burn into ROM during development.
-
 
 ## ICs
 

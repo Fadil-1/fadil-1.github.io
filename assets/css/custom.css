@@ -1112,14 +1112,14 @@ body {
     position: sticky !important;
     top: 90px;
     left: auto !important;
-    width: 275px !important;
-    max-width: 275px !important;
-    flex: 0 0 275px;
+    width: 300px !important;
+    max-width: 300px !important;
+    flex: 0 0 300px;
     height: calc(100vh - 120px) !important;
     overflow-y: auto;
     background: #ffffff;
     border-bottom: none;
-    padding: 20px 16px 30px 16px;
+    padding: 20px 24px 30px 16px;
     z-index: 1;
   }
 
@@ -1216,18 +1216,20 @@ body {
     display: block !important;
     position: fixed !important;
     top: 60px !important;
-    left: -290px !important;
-    width: 280px !important;
-    max-width: 80vw !important;
+    left: -310px !important;
+    width: 300px !important;
+    max-width: 86vw !important;
     height: calc(100vh - 60px) !important;
+    height: calc(100dvh - 60px) !important;
     overflow-y: auto;
     background: #ffffff;
     border-right: 1px solid #ededed;
     border-bottom: none;
-    padding: 70px 18px 24px 18px !important;
+    padding: 70px 24px calc(96px + env(safe-area-inset-bottom)) 18px !important;
     margin: 0;
     z-index: 3;
     transition: left 0.25s ease-out;
+    -webkit-overflow-scrolling: touch;
   }
 
   .container-main.cpu-page .sidebar.sidebarshow {
