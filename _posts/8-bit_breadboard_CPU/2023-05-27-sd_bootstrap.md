@@ -16,11 +16,11 @@ The previous pages introduced the SPI bus and the SPI hardware module in my CPU.
 
 The SD bootstrap is the ROM-resident loader that initializes the SD card, reads a small boot descriptor, copies a stage-2 payload from the card into RAM, and jumps to it.
 
-ROM space is limited, and ROM updates are inconvenient. Before the SD loader, I had to remove the program ROM chip from a cramped part of the build, reprogram it, wait for the programmer to finish, and then plug it back into the board. Over time, repeating this process made me worry about weakening the pins.
+ROM space is limited, and ROM updates are inconvenient. Before the SD loader, I had to remove the program ROM chip from a cramped part of the build, reprogram it, wait for the programmer to finish, and then plug it back into the board. Over time, repeating this process made me worry about weakening the ROM's pins.
 
 With the SD bootstrap, the ROM only needs enough code to load programs from the SD card. Larger programs can live on the card and be replaced much more easily. Instead of pulling chips out of the computer, I now just update the SD card from my laptop next to the build and test new programs almost immediately.
 
-# What the ROM Can and Cannot Know
+# Boot ROM Logic
 
 At reset, the CPU begins execution from the boot ROM region. In the current memory map, ROM code starts at `0xC000`.
 
@@ -63,7 +63,7 @@ block 1003
 
 The bootstrap code reads sectors by number. For an SDHC card, `CMD17` can read one 512-byte block using the block number as the address.
 
-This is why the boot flow can say things like:
+For that reason, the boot flow can say things like:
 
 ```text
 Read block 1002 into RAM at 0x0400.
@@ -207,7 +207,7 @@ The usual stage-2 payload load address is:
 0x0200
 ```
 
-These addresses are development conventions.II chose them because they are easy to inspect and clearly separate from the ROM region.
+These addresses are development conventions. I chose them because they are easy to inspect and clearly separate from the ROM region.
 
 # Reading One SD Block Into RAM
 
@@ -306,7 +306,7 @@ Expected values:
 
 That is the `BT1` signature. If any byte does not match, the bootstrap jumps to its failure path and prevents the ROM from treating random SD-card data as a valid boot descriptor.
 
-## Loading the Stage-2 Payload
+## Stage-2 Payload Transfer
 
 Once the descriptor is validated, the ROM copies the descriptor fields into scratch RAM.
 
@@ -340,7 +340,7 @@ Adding `0x0200` advances the destination by exactly 512 bytes, because one SD se
 
 When the remaining sector count reaches zero, the payload has been copied into RAM.
 
-## Jumping to Stage 2
+## Stage-2 Jump
 
 After the payload is loaded, the ROM jumps to the descriptor-provided load address.
 
@@ -374,7 +374,7 @@ In the multi-sector version, the current markers are:
 0x99  failure
 ```
 
-During the multi-sector load loop, the bootstrap also displays a small counter for completed sector reads. That makes it easier to tell whether the loader is failing before the payload, during the payload copy, or after the payload copy.
+During the multi-sector load loop, the bootstrap also displays a small counter for completed sector reads. It makes it easier to tell whether the loader is failing before the payload, during the payload copy, or after the payload copy.
 
 # Single-Sector Version vs Multi-Sector Version
 
@@ -393,112 +393,149 @@ The newer version supports the descriptor-provided load address and sector count
 
 For the current project direction, the multi-sector version is the more useful one because larger OLED demos and monitor programs can exceed one 512-byte sector.
 
-# make_bootdesc.py
+# Host-Side Deployment Scripts
 
-For one-sector descriptor-based booting, the descriptor may need to be created or refreshed manually.
+Two small Python scripts handle the host-computer side of the SD bootstrap flow.
 
-This command creates a descriptor for the common baseline:
+`make_bootdesc.py` creates a 512-byte `BT1` descriptor sector. `deploy_asm.py` assembles a program with `customasm`, trims the assembled image from the requested origin, packages the result for ROM or SD use, and can write the SD payload directly to the card.
 
-```bash
-python3 make_bootdesc.py --payload-block 1003 --load-addr 0x0200 --block-count 1 --out bootdesc_v1.bin
-```
+The examples below show the same flow on Linux and Windows. The device names are from my own test machines, so they should not be copied blindly. Always identify the SD card first and confirm its size before a direct write.
 
-The expected first 12 bytes are:
+## Linux Workflow
 
-```text
-42 54 31 00 00 00 03 EB 02 00 00 01
-```
-
-To write that descriptor to SD block `1002`:
+On Linux, I compare `lsblk` output before and after the SD card is attached. The new `29.1G` device is the card. In the example below, the external adapter appears as `sdb`, with the first partition as `sdb1`.
 
 ```bash
-sudo dd if=bootdesc_v1.bin of=/dev/mmcblk0 bs=512 seek=1002 conv=notrunc status=progress
-sync
-```
-
-## Manual Verification
-
-It is useful to read the descriptor back and inspect it.
-
-```bash
-sudo dd if=/dev/mmcblk0 of=readback_bootdesc.bin bs=512 skip=1002 count=1 status=progress
-sync
-xxd -g 1 readback_bootdesc.bin | head
-```
-
-A valid descriptor should begin with:
-
-```text
-42 54 31
-```
-
-For the baseline one-sector payload, the first 12 bytes should be:
-
-```text
-42 54 31 00 00 00 03 EB 02 00 00 01
-```
-
-A payload block can also be read back:
-
-```bash
-sudo dd if=/dev/mmcblk0 of=readback_payload.bin bs=512 skip=1003 count=1 status=progress
-sync
-xxd -g 1 readback_payload.bin | head
-```
-
-The generated files can be compared against the readback files:
-
-```bash
-cmp -l bootdesc_v1.bin readback_bootdesc.bin
-cmp -l stage_2/stage2_monitor_v1_sector.bin readback_payload.bin
-```
-
-If `cmp` prints nothing, the files match exactly.
-
-
-# deploy_asm.py
-
-The deployment script automates the build side of this workflow.
-
-For ROM builds, it assembles the ROM bootstrap and writes programmer-friendly output files.
-
-A typical ROM build looks like this:
-
-```bash
-python3 deploy_asm.py rom sd_bootstrap_v2_multi_sector.asm --origin 0xC000 --dump-annotated --out-dir build_rom
-```
-
-For SD builds, it assembles a RAM-targeted stage-2 payload and packages it for SD-card write.
-
-A typical stage-2 payload starts at:
-
-```text
-#addr 0x0200
-```
-
-*Note: My laptop's built-in SD card reader labels my card `/dev/mmcblk0`, but my external adapter names it /dev/sdb*
-
-A direct SD write can look like this:
-
-```bash
-sudo env "PATH=$PATH" python3 deploy_asm.py sd stage2_monitor_v1.asm --origin 0x0200 --device /dev/mmcblk0 --block 1003 --descriptor-block 1002 --dump-annotated --out-dir stage_2
+lsblk
 ```
 
 <figure>
-    <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/sd_bootstrap/sd_bootstrap_deploy_session.png" alt="Terminal output from the SD bootstrap descriptor and deploy_asm workflow">
-    <figcaption>Figure 1: Making BT1 descriptor, ROM bootstrap, and writing a multi-sector stage-2 payload to the SD card.</figcaption>
+    <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/sd_bootstrap/sd_bootstrap_linux_device_detection.png" alt="Linux lsblk output before and after the SD card appears">
+    <figcaption>Figure 1: Linux device check with <code>lsblk</code>. The new <code>sdb</code>/<code>sdb1</code> entry is the SD card in this test.</figcaption>
+</figure>
+<br>
+
+For a raw whole-card layout, the disk node is usually the closer match to the CPU's view of the SD card. In that case, the device would be:
+
+```text
+/dev/sdb
+```
+
+For a partition-relative test, the first partition would look like:
+
+```text
+/dev/sdb1
+```
+
+The screenshots in this section use `/dev/sdb1` for the Linux test setup shown on my laptop. If the ROM reads whole-card block numbers, use the whole disk device instead and re-check the target carefully.
+
+A descriptor-only write can be done with `make_bootdesc.py`:
+
+```bash
+sudo python3 make_bootdesc.py --payload-block 1003 --load-addr 0x0200 --block-count 1 --out bootdesc.bin --device /dev/sdb1 --descriptor-block 1002 --verify-readback
+```
+
+A ROM build does not need SD-card access:
+
+```bash
+python3 deploy_asm.py rom sd_bootstrap_v2_multi_sector.asm --origin 0xC000 --dump-annotated --out-dir ROM
+```
+
+A direct SD payload write can be done with `deploy_asm.py`:
+
+```bash
+sudo env "PATH=$PATH" python3 deploy_asm.py sd test_program.asm --origin 0x0200 --device /dev/sdb1 --block 1003 --descriptor-block 1002 --dump-annotated --out-dir SD
+sync
+```
+
+**After writing to the SD card, run `sync` before removing it. I ran into several confusing debug sessions before realizing Linux had not flushed the latest writes to the card yet.**
+
+The `sudo env "PATH=$PATH"` form keeps the normal shell path available to the script. That helps when `customasm` is available in the user shell but not in root's default path.
+
+<figure>
+    <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/sd_bootstrap/sd_bootstrap_deploy_session.png" alt="Linux terminal output from the SD bootstrap descriptor and deploy_asm workflow">
+    <figcaption>Figure 2: Linux terminal output for the BT1 descriptor, ROM bootstrap build, and multi-sector stage-2 payload write.</figcaption>
 </figure>
 <br>
 
 The script checks the trimmed payload size. If the payload fits in one 512-byte sector, the script writes one padded sector at the payload block. In that single-sector path, it does not automatically rewrite the BT1 descriptor.
 
+If the payload is larger than one sector, the script writes a padded multi-sector payload at the payload block, creates a BT1 descriptor, writes the descriptor to the descriptor block, and verifies both with readback checks.
+
 <figure>
-    <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/sd_bootstrap/sd_bootstrap_output_files.png" alt="Generated ROM and SD output files from deploy_asm">
-    <figcaption>Figure 2: ROM and SD output files generated by the deployment workflow.</figcaption>
+    <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/sd_bootstrap/sd_bootstrap_output_files.png" alt="Generated Linux ROM and SD output files from deploy_asm">
+    <figcaption>Figure 3: ROM and SD output files from the Linux deployment workflow.</figcaption>
 </figure>
 <br>
 
-If the payload is larger than one sector, the script writes a padded multi-sector payload starting at the payload block, creates a BT1 descriptor, writes the descriptor to the descriptor block, and verifies both by reading them back.
+## Windows Workflow
+
+**Note:** Open PowerShell as Administrator before running the Windows SD-card commands. Raw physical-drive access and volume locking usually require elevated permissions.
+
+On Windows, the same SD card appears as a physical disk rather than a `/dev/...` path. I first run `Get-Disk` before and after the card appears. In the example below, the SD card is `Disk 5`, so the raw device path is:
+
+```powershell
+Get-Disk
+```
+
+```text
+\\.\PhysicalDrive5
+```
+
+<figure>
+    <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/sd_bootstrap/sd_bootstrap_windows_disk_detection.jpg" alt="Windows Get-Disk output before and after the SD card appears">
+    <figcaption>Figure 4: Windows <code>Get-Disk</code> output before and after the SD card appears. The new 29.12 GB disk is <code>PhysicalDrive5</code> in this test.</figcaption>
+</figure>
+<br>
+
+Windows also needs a volume lock when the script writes to the raw physical drive. I use `Get-CimInstance Win32_Volume` to find the SD-card volume GUID. The right entry is the FAT32 volume whose capacity matches the card. Run:
+
+```powershell
+Get-CimInstance Win32_Volume |
+    Select-Object DriveLetter, Label, FileSystem, Capacity, DeviceID
+```
+
+In my test, the SD-card volume GUID was:
+
+```text
+\\?\Volume{2a7913e0-4753-11f1-a6cb-28cdc480a7e2}\
+```
+
+Again, the Windows commands below should be run from Administrator PowerShell. The volume GUID and physical drive number must match the current SD card.
+
+Descriptor-only write:
+
+```powershell
+python make_bootdesc.py --payload-block 1003 --load-addr 0x0200 --block-count 1 --out bootdesc.bin --device "\\.\PhysicalDrive5" --windows-lock-volume "\\?\Volume{2a7913e0-4753-11f1-a6cb-28cdc480a7e2}\" --descriptor-block 1002 --verify-readback
+```
+
+ROM build:
+
+```powershell
+python deploy_asm.py rom sd_bootstrap_v2_multi_sector.asm --origin 0xC000 --dump-annotated --out-dir ROM
+```
+
+Direct SD payload write:
+
+```powershell
+python deploy_asm.py sd test_program.asm --origin 0x0200 --device "\\.\PhysicalDrive5" --windows-lock-volume "\\?\Volume{2a7913e0-4753-11f1-a6cb-28cdc480a7e2}\" --block 1003 --descriptor-block 1002 --dump-annotated --out-dir SD
+```
+
+The Windows output mirrors the Linux flow from writing the descriptor to running the readback check.
+
+<figure>
+    <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/sd_bootstrap/sd_bootstrap_windows_deploy_session.jpg" alt="Windows PowerShell output from the SD bootstrap descriptor and deploy_asm workflow">
+    <figcaption>Figure 5: Windows PowerShell output for the BT1 descriptor, ROM bootstrap build, and multi-sector stage-2 payload write.</figcaption>
+</figure>
+<br>
+
+The generated files match the same logical outputs as the Linux run: descriptor file, ROM files, trimmed SD payload, padded payload, generated descriptor, annotated listing, and manifest.
+
+<figure>
+    <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/sd_bootstrap/sd_bootstrap_windows_output_files.jpg" alt="Generated Windows ROM and SD output files from deploy_asm">
+    <figcaption>Figure 6: ROM and SD output files from the Windows deployment workflow.</figcaption>
+</figure>
+<br>
 
 # Current Baseline
 

@@ -58,7 +58,7 @@ The port selector is made out of a 4-bit register and a decoder. The register st
 
 `_PS` loads the selected port value into the port selector register. Once the port value is stored, `_PSW` is used when the CPU writes to the selected port, and `_PSE` is used when the selected port drives data back onto the CPU bus.
 
-For the SPI module, the SPI port is selected through this same mechanism. Once the SPI port is selected, writes update the SPI output register, which controls MOSI, SCLK, SD-card chip select, and BLE chip select. Reads enable the SPI input path, so the CPU can read signals such as MISO.
+For the SPI module, the SPI port is selected through this same mechanism. Once the SPI port is selected, writes update the SPI output register, which controls MOSI, SCLK, SD-card chip select, and BLE chip select. Reads enable the SPI input path, so the CPU can read MISO.
 
 The CPU only needs to select the SPI port and then perform a normal input or output operation; the port selector handles which external circuit is connected for that transfer.
 
@@ -102,6 +102,7 @@ bit 0 -> MOSI
 bit 1 -> SCLK
 bit 2 -> CS_SD
 bit 3 -> CS_BLE
+bit 7 -> MISO
 ```
 
 The exact constant names in assembly are used to make this easier to read:
@@ -111,6 +112,7 @@ MOSI        = 0b00000001
 SCLK        = 0b00000010
 SD_CARD_CS  = 0b00000100
 BLE_CS      = 0b00001000
+MISO        = 0b10000000
 ```
 
 With this mapping, the CPU can set or clear SPI lines by modifying bits in the output value and writing the result to the SPI port.
@@ -181,7 +183,7 @@ repeat 8 times:
     bring SCLK low
 ```
 
-**This is bit-banging**: The CPU manually creates every SPI clock edge in software.
+**That's called bit-banging**: The CPU manually creates every SPI clock edge in software.
 
 The benefit is that the routine is easy to adapt and inspect. The downside is that the maximum SPI speed is limited by the CPU clock and the number of micro-operations needed for each bit.
 
@@ -243,8 +245,8 @@ The SD-card layer sits above that and handles SD-specific details like command f
 
 # Practical Debugging Notes
 
-Although SD-card initialization guidelines usually recommend a startup clock in the `100kHz` to `400kHz` range, <a href="https://www.amazon.com/dp/B07R8GVGN9?ref_=ppx_hzsearch_conn_dt_b_fed_asin_title_7" target="_blank">my card</a> still entered SPI mode at my CPU’s lowest clock speed, around `17kHz`(Which means SCKL was even way slower due to bit banging).
-At that speed, the command sequence and response bytes were much easier to inspect during debugging. I'd sometimes just record the CPU running and watch the registers contents in slow mo. I recommend starting at the slowest clock speed first, confirm that `CMD0` and the initialization sequence behave correctly, and only then increase the clock speed.
+Although SD-card initialization guidelines usually recommend a startup clock in the `100kHz` to `400kHz` range, <a href="https://www.amazon.com/dp/B07R8GVGN9?ref_=ppx_hzsearch_conn_dt_b_fed_asin_title_7" target="_blank">my card</a> still entered SPI mode at my CPU’s lowest clock speed, around `17kHz`(Which means SCKL was even slower due to bit banging).
+At that speed, the command sequence and response bytes were much easier to inspect during debugging. I'd sometimes just record the CPU running with my phone and debug the registers contents in slow mo. I recommend starting at the slowest clock speed first, confirm that `CMD0` and the initialization sequence behave correctly, and only then increase the clock speed.
 
 For bring-up, I found it useful to test the SPI byte routines first, then the SD command responses, and only then the full block-read path.
 

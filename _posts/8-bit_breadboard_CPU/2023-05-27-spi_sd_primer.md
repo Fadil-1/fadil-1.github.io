@@ -12,9 +12,7 @@ permalink: /blog/8-bit_breadboard_CPU/spi_sd_primer/
 
 # SPI & SD Primer
 
-The next major I/O interface in my CPU is the SPI bus. I use it mainly for the SD card interface, but the same bus can also support other SPI devices. The SD card module is one of the most important because it gives the computer a practical way to load larger programs without constantly burning ROMs.
-
-This page is the primer for the SPI and SD card work. It explains the SPI bus, the SD card command format, and the basic initialization sequence needed before the CPU can read blocks from the card. The next articles then focus on my actual SPI hardware module and the ROM bootstrap code.
+The next major I/O interface in my CPU is the SPI bus. I use it mainly for the SD card interface, but the same bus can also support other SPI devices. The SD card module is one of the most important because it gives the computer a practical way to load larger programs without constantly burning ROMs. This page explains the SD card command format and the basic initialization sequence needed before the CPU can read blocks from the card.
 
 # SPI Basics
 
@@ -29,7 +27,7 @@ A basic SPI connection uses four signals:
 
 The controller can share MOSI, MISO, and SCLK across multiple peripherals. Each peripheral then gets its own chip-select line.
 
-**Data transfer is Byte-Oriented in SPI Mode**, this means that data is sent and received one byte at a time over SPI. Take this with a grain of salt, but the way I believe bytes are internally handled within slave SPI memory controllers is through a combination of a shift and buffer register, just like the Master device would. I made the diagram below to picture it.
+**Data transfer is Byte-Oriented in SPI Mode**, this means that data is sent and received one byte at a time over SPI. Take this with a grain of salt, but the way I believe bytes are internally handled within slave SPI memory controllers is through a combination of a shift and buffer register, just like the Master device would.
 
 <figure>
     <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/spi_sd/internal_SPI_Regs.png" alt="Figure 1: SPI shift-register model">
@@ -104,7 +102,7 @@ SD cards come in various types, including:
 - **SXDC:** Extended Capacity SD cards with capacities exceeding 32GB, up to 2TB.
 - **SDUC:** Ultra Capacity SD cards with capacities greater than 2TB, up to 128TB.
 
-The two most popular standards nowadays, naturally are SDHC and SHXC, because less than 2GB is too low, and more than that 2TB is too much for most SD cards use cases. One of the essential features of the SD protocol is its compatibility with SPI(Note: As far as I am aware, SDUC does not support SPI.)
+(Note: As far as I am aware, SDUC does not support SPI.)
 
 I use a 32 GB microSDHC card for mass storage in this build.
 
@@ -161,7 +159,7 @@ For `CMD0`, the command has no argument, so its full command frame is:
 
 `0x40` is the command index byte for `CMD0`, the four argument bytes are zero, and `0x95` is the required CRC/end-bit byte for `CMD0`.
 
-# CRC During Initialization
+## CRC During Initialization
 
 CRC stands for **C**yclic **R**edundancy **C**heck. It is an error-detection value calculated from a message before transmission. The receiver can calculate the same value from the received message and compare it with the CRC that came with the message. If the two values do not match, the receiver knows that the message may have been corrupted.
 
@@ -182,7 +180,7 @@ It sends command `CMD8`, voltage range `0x1`, check pattern `0xAA`, and the comm
 
 The full CRC math is not important for normal use of the CPU, but initialization still depends on a few fixed CRC bytes, so I keep the command bytes explicit in the SD routines rather than trying to compute CRC at runtime.
 
-# Responses
+## Responses
 
 After a command is sent, the card returns a response token. The most common one during initialization is the **R1** response, which is one byte.
 
@@ -203,7 +201,7 @@ During initialization, `0x01` usually means the card is still in idle state, and
 
 Some commands return longer responses. For example, `CMD8` returns an R7 response, which includes the normal R1 byte plus four extra bytes. Those extra bytes contain information such as the voltage range and check pattern.
 
-# Initialization Commands
+## Initialization Commands
 
 The initialization sequence used for modern SDHC-style cards follows this general pattern:
 
