@@ -4,7 +4,7 @@ title: OLED
 mathjax: true
 similar: 8-bit-computers
 date_child: "May 27, 2023"
-last_updated: "May 1, 2026"
+last_updated: "May 6, 2026"
 category: children
 parent: 8-bit_breadboard_CPU
 permalink: /blog/8-bit_breadboard_CPU/oled_display/ 
@@ -20,7 +20,7 @@ permalink: /blog/8-bit_breadboard_CPU/oled_display/
 <p>On the other hand, similarly-sized OLED displays are controlled on a pixel basis. While this offers more control over each pixel, it also introduces greater complexity in programming and control as each pixel must be addressed and manipulated independently, which can be more challenging and time-consuming.</p>
 </div>
 
-I use the Adafruit 2.7" Monochrome 128x64 OLED display module. It has both SPI and 8-bit parallel modes (6800 and 8080). Since my build is relatively slow (at least compared to commercial MCUs), I use the parallel mode; 6800 specifically since it’s simpler and more common than 8080. The display is driven by the Solomon Systech [SSD1325](http://www.adafruit.com/datasheets/SSD1325.pdf) OLED driver and uses 3V logic HIGH, so I use some level shifters to step down the 5V voltage coming from other parts of the CPU into the display's 3V input pins. 
+I use the Adafruit 2.7" Monochrome 128x64 OLED display module. It has both SPI and 8-bit parallel modes (6800 and 8080). Since my build is relatively slow (at least compared to commercial MCUs), I use the parallel mode; 6800 specifically since it’s simpler and more common than 8080. The display is driven by the Solomon Systech [SSD1325](http://www.adafruit.com/datasheets/SSD1325.pdf) OLED driver and uses 3V logic HIGH, so I use some level shifters to step down the 5V voltage coming from other parts of the CPU into the display's 3V input pins.
 
 *In the first version of this module, I was using the 3.3V output from the SD card reader, and it worked. But I once probed that rail and found that it was much lower than expected, around 2V, so I replaced it with a dedicated 5V-to-3.3V regulator module just to be an the safe side.*
 
@@ -194,6 +194,12 @@ The initialization sequence below, among many things, mainly clears any residual
 
 **14- Turn the Display ON**:
 - Send `0b10101111` / `0xAF` (command to turn on the display).
+
+
+<div class="grey-background">
+<p><strong>OLED row-boundary note:</strong> I found out that writes which touched raw pixel row 63 produced a visible artifact near the top of the OLED display. Normal 5x7 text usually hides this because the last row of each 8-pixel cell is blank spacing. Filled graphics can expose the behavior. For denser text and safer bottom-row behavior, I made a compact 4x6 text library that only uses raw rows 0 through 62.</p>
+</div>
+
 
 ## ICs
 

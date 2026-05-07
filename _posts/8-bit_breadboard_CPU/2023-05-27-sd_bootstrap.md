@@ -3,8 +3,8 @@ layout: 8-bit_breadboard_CPU
 title: SD Bootstrap
 mathjax: true
 similar: 8-bit-computers
-date_child: "May 27, 2023"
-last_updated: "May 2, 2026"
+date_child: "May 5, 2026"
+last_updated: "May 6, 2026"
 category: children
 parent: 8-bit_breadboard_CPU
 permalink: /blog/8-bit_breadboard_CPU/sd_bootstrap/
