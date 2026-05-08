@@ -1,6 +1,6 @@
 ---
 layout: 8-bit_breadboard_CPU
-title: 8-bit Breadboard CPU
+title: "F8-BB: 8-bit Breadboard CPU"
 featured-img: 8-bit_bb_cpu.jpg
 mathjax: true
 overview: Table of Contents
