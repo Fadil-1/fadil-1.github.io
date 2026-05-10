@@ -171,7 +171,7 @@ Since `WE` is an inverted input, the write pulse should start after `WE` falls f
 <br>
 
 
-The oscilloscope is showing the node between the capacitor and the 100 Ohm resistor. Let’s that **node A**. Assuming stable initial conditions (the push button has never been pressed):
+The oscilloscope is showing the node between the capacitor and the 100 Ohm resistor. Let’s call it **node A**. Assuming stable initial conditions (the push button has never been pressed):
 
 1. When the push button is open, the voltage(potential to be correct) at node A is the same as the battery’s positive terminal, because there is no current flow, therefore no voltage drop.
 2. Right at the instant when the switch is closed, the voltage at node A "falls" to zero because the net charge on each of the two plates of the capacitor is equal(The plates are at equipotential).
