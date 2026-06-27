@@ -27,11 +27,11 @@ Only one component should drive the bus at a time. If two outputs drive the same
 On the other hand, multiple components can read data from the bus at the same time. They would simply be "sensing" information from the bus instead of concurrently asserting voltage on it.
 </div>
 
-As mentioned in the overview, my build has an 8-bit data bus and a 16-bit system/memory bus. The name "data bus" is somewhat loose, since all computer buses carry data of some kind. In this build, I use "data bus" to refer to the 8-bit bus that carries register values, instruction operands, memory data, and I/O data. The 16-bit system/memory bus carries addresses and connects the CPU to memory-related modules.
+As mentioned in the overview, my F8-BB build has an 8-bit data bus and a 16-bit system/memory bus. The name "data bus" is somewhat loose, since all computer buses carry data of some kind. In this build, I use "data bus" to refer to the 8-bit bus that carries register values, instruction operands, memory data, and I/O data. The 16-bit system/memory bus carries addresses and connects the CPU to memory-related modules.
 
 The 16-bit address bus, explained in more detail in the RAM post, is an enhancement to the memory capacity without making the design overly complex. In simple terms, a 16-bit address bus allows the CPU to access a larger memory space compared to an 8-bit address bus. With 16 bits, the CPU can address up to 65,536 ($2^{16}$) individual memory locations, which provides ample space to store and retrieve data and instructions.
 
-My build contains five general-purpose registers (GPRs): A, B, C, D, and E, though register E supports only a limited set of instructions. All GPRs can read from and write to the 8-bit data bus. Four of them are dual 74HCT173(173) which I had assembled when initially building the SAP-1, and the last one is a  74HCT574(574).
+F8-BB contains five general-purpose registers (GPRs): A, B, C, D, and E, though register E supports only a limited set of instructions. All GPRs can read from and write to the 8-bit data bus. Four of them are dual 74HCT173(173) which I had assembled when initially building the SAP-1, and the last one is a  74HCT574(574).
 
 # Implementation
 
@@ -81,7 +81,7 @@ Unlike the 74HCT173, the 74HCT574 does not have a data-enable input. Its output-
 
 
 
-Unlike some other 8-bit register ICs with built-in gated enables, the 74HCT574 has a very clean pin layout: All inputs and outputs are aligned on opposite sides of the IC, which makes it very breadboard-friendly, just like the 74HCT173. Some of the 574s in my build are used without a transceiver due to space constraints on the breadboards.
+Unlike some other 8-bit register ICs with built-in gated enables, the 74HCT574 has a very clean pin layout: All inputs and outputs are aligned on opposite sides of the IC, which makes it very breadboard-friendly, just like the 74HCT173. Some of the 574s in the F8-BB are used without a transceiver due to space constraints on the breadboards.
 
 
 <figure>

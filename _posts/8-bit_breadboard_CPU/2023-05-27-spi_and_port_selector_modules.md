@@ -243,7 +243,7 @@ SD block read into RAM
 
 The SD-card layer sits above that and handles SD-specific details like command frames, and 512-byte block reads.
 
-# Practical Debugging Notes
+# Debugging Notes
 
 Although SD-card initialization guidelines usually recommend a startup clock in the `100kHz` to `400kHz` range, <a href="https://www.amazon.com/dp/B07R8GVGN9?ref_=ppx_hzsearch_conn_dt_b_fed_asin_title_7" target="_blank">my card</a> still entered SPI mode at my CPU’s lowest clock speed, around `17kHz`(Which means SCKL was even slower due to bit banging).
 At that speed, the command sequence and response bytes were much easier to inspect during debugging. I'd sometimes just record the CPU running with my phone and debug the registers contents in slow mo. I recommend starting at the slowest clock speed first, confirm that `CMD0` and the initialization sequence behave correctly, and only then increase the clock speed.

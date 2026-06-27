@@ -11,7 +11,7 @@ permalink: /blog/8-bit_breadboard_CPU/ram_&_rom_primer/
 ---
 # RAM & ROM Primer
 
-**Before the RAM module, I want to introduce a few memory concepts that appear often in digital electronics. Some of these details go beyond what this build strictly needs, but after the practical RAM section, they may feel more intuitive and easier to connect to real hardware.**
+**Before the RAM module, I want to introduce a few memory concepts that appear often in digital electronics. Some of these details go beyond what this build strictly needs, but after the RAM section, they may feel more intuitive and easier to connect to real hardware.**
 
 # Basics Primer
 

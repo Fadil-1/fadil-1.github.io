@@ -47,10 +47,9 @@ In the current version of the CPU, the microcode ROMs are one of the biggest dif
 </figure>
 <br>
 
-**One practical note: although the chips I use are M27C4002 EPROMs, the GQ programmer software repeatedly failed when I chose the M27C4002 device profile. In my setup, the TMS27PC240 profile worked instead. The two ROMs have the same pinout and compatible organization for this programming workflow, so I used the TMS27PC240 profile to write and verify the M27C4002 ROMs.**
+**Note: although the chips I use are M27C4002 EPROMs, the GQ programmer software repeatedly failed when I chose the M27C4002 device profile. In my setup, the TMS27PC240 profile worked instead. The two ROMs have the same pinout and compatible organization for this programming workflow, so I used the TMS27PC240 profile to write and verify the M27C4002 ROMs.**
 
-
-Another practical detail I should mention is how I erase the EPROMs. I don't use a dedicated EPROM eraser. Instead, I use a small UV phone sanitizing box. The EPROMs have quartz windows, so the UV light can erase the stored charge over time.
+Another detail I should mention is how I erase the EPROMs. I don't use a dedicated EPROM eraser. Instead, I use a small UV phone sanitizing box. The EPROMs have quartz windows, so the UV light can erase the stored charge over time.
 
 
 <figure>

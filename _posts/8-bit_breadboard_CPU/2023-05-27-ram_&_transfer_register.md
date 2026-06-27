@@ -21,11 +21,11 @@ permalink: /blog/8-bit_breadboard_CPU/ram_&_transfer_register/
 
 
 
-To fetch addresses coming from the Program Counter (PC), the SAP-1 uses a Memory Address Register (MAR) to first store the addresses before accessing them in RAM. My build has no need for a MAR, as it has a dedicated memory/system bus. With a system bus, the PC and all other memory-related modules interface with the RAM and each other directly.
+To fetch addresses coming from the Program Counter (PC), the SAP-1 uses a Memory Address Register (MAR) to first store the addresses before accessing them in RAM. My F8-BB build has no need for a MAR, as it has a dedicated memory/system bus. With a system bus, the PC and all other memory-related modules interface with the RAM and each other directly.
 
 <figure>
-    <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/ram_&_br/2.png" alt="Figure 2: My Build’s Block Diagram">
-    <figcaption>Figure 2: My Build’s Block Diagram</figcaption>
+    <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/ram_&_br/2.png" alt="Figure 2: F8-BB’s Block Diagram">
+    <figcaption>Figure 2: F8-BB's Block Diagram</figcaption>
 </figure>
 <br>
 
@@ -69,7 +69,7 @@ The OS EEPROM is an X28C256, which is a 32K x 8-bit EEPROM. Since only a 16 KB w
 </figure>
 <br>
 
-Just like the SAP-1, my build can be set to either Programming or Run mode. When in programming mode, some DIP switches are used to manually point to memory addresses and enter data into RAM. An SPDT switch is used to switch between the two modes, and a push button is used to trigger the RAM’s write pin.
+Just like the SAP-1, the F8-BB can be set to either Programming or Run mode. When in programming mode, some DIP switches are used to manually point to memory addresses and enter data into RAM. An SPDT switch is used to switch between the two modes, and a push button is used to trigger the RAM’s write pin.
 
 Below is a high level diagram to better illustrate the memory logic.
 

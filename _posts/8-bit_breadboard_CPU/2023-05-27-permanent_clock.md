@@ -80,7 +80,7 @@ Also, increasing the supply voltage, within the chip limit of course👀, usuall
 
 The voltage on my rails is around 4.90 V, which is higher than the 4.5 V value I use for timing estimates. The CPU will also always run indoors at room temperature.
 
-For that reason, I treat the 4.5 V / 25°C timing values as a conservative estimate where they are available. When a datasheet only gives a 5 V value, I use that value and leave some practical margin instead of trying to push the clock to the calculated limit.
+For that reason, I treat the 4.5 V / 25°C timing values as a conservative estimate where they are available. When a datasheet only gives a 5 V value, I use that value and leave some margin instead of trying to push the clock to the calculated limit.
 
 The HIGH phase of the clock just latches data prepared during the LOW phase. Therefore, the critical path for the HIGH phase is the chip with the longest $t_{pcq}$ latched during this phase. The register with the highest $t_{pcq}$ is the 74HCT194 shift reg, with a $t_{pcq}$ max of 37ns.
 
