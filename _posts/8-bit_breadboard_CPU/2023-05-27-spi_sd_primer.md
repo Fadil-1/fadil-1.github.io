@@ -267,4 +267,4 @@ read and discard 2 CRC bytes
 
 For SDHC cards, the address used by `CMD17` is a block number rather than a byte address. That is convenient for the CPU because the bootloader can refer to fixed 512-byte blocks on the card.
 
-The bootloader flow uses this idea by placing a small descriptor at one block and the payload at another. The ROM bootstrap can read the descriptor, learn where the payload lives, and then load the payload into RAM.
+The bootloader flow uses this idea by placing a small descriptor at one block and the program at another. The ROM bootstrap can read the descriptor, learn where the program lives, and then load the program into RAM.

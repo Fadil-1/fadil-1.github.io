@@ -14,7 +14,7 @@ permalink: /blog/8-bit_breadboard_CPU/sd_bootstrap/
 
 The previous pages introduced the SPI bus and the SPI hardware module in my CPU.  Now the goal is to use the SD card as external storage and load a program into RAM.
 
-The SD bootstrap is the ROM-resident loader that initializes the SD card, reads a small boot descriptor, copies a stage-2 payload from the card into RAM, and jumps to it.
+The SD bootstrap is the ROM-resident loader that initializes the SD card, reads a small boot descriptor, copies a stage-2 program from the card into RAM, and jumps to it.
 
 ROM space is limited, and ROM updates are inconvenient. Before the SD loader, I had to remove the program ROM chip from a cramped part of the build, reprogram it, wait for the programmer to finish, and then plug it back into the board. Over time, repeating this process made me worry about weakening the ROM's pins.
 
@@ -38,8 +38,8 @@ The descriptor-based flow is more flexible:
 
 ```text
 Read descriptor block 1002.
-Use the descriptor to find the payload block, load address, and sector count.
-Read the payload sector or sectors.
+Use the descriptor to find the program block, load address, and sector count.
+Read the program sector or sectors.
 Jump to the loaded program.
 ```
 
@@ -78,13 +78,13 @@ The current development convention is:
 
 ```text
 SD block 1002: BT1 boot descriptor
-SD block 1003: first stage-2 payload sector
-SD block 1004: second stage-2 payload sector, if needed
-SD block 1005: third stage-2 payload sector, if needed
+SD block 1003: first stage-2 program sector
+SD block 1004: second stage-2 program sector, if needed
+SD block 1005: third stage-2 program sector, if needed
 ...
 ```
 
-`BT1` is the descriptor format used by this bootstrap flow. It is not an SD-card standard or a filesystem format, but a small project-specific record that tells the ROM bootstrap where to find the stage-2 payload.
+`BT1` is the descriptor format used by this bootstrap flow. It is not an SD-card standard or a filesystem format, but a small project-specific record that tells the ROM bootstrap where to find the stage-2 program.
 
 The name appears directly in the first three bytes of the descriptor:
 
@@ -103,7 +103,7 @@ The `1` is the descriptor version.
 
 It lets the ROM check that the sector it read looks like the expected descriptor before trusting the rest of the values.
 
-Block `1002` only contains boot metadata, it does not contain executable code. The payload code starts at the block listed inside the descriptor, normally block `1003`.
+Block `1002` only contains boot metadata, it does not contain executable code. The stage-2 program starts at the block listed inside the descriptor, normally block `1003`.
 
 The descriptor is read into RAM at:
 
@@ -123,21 +123,21 @@ The descriptor uses one 512-byte SD sector. Only the first 12 bytes are currentl
 | `1` | Magic byte `0x54`, ASCII `T` |
 | `2` | Version byte `0x31`, ASCII `1` |
 | `3` | Flags / reserved |
-| `4` | Payload start block bits `[31:24]` |
-| `5` | Payload start block bits `[23:16]` |
-| `6` | Payload start block bits `[15:8]` |
-| `7` | Payload start block bits `[7:0]` |
+| `4` | Program start block bits `[31:24]` |
+| `5` | Program start block bits `[23:16]` |
+| `6` | Program start block bits `[15:8]` |
+| `7` | Program start block bits `[7:0]` |
 | `8` | Load address high byte |
 | `9` | Load address low byte |
 | `10` | Sector count high byte |
 | `11` | Sector count low byte |
 | `12..511` | Unused / zero-filled |
 
-Byte `3` is reserved for flags. Right now, my bootloader does not use any flag bits, so the field is set to `0x00`. I keep it in the descriptor so future versions can add simple options without changing the layout. For example, a later version could use flag bits to select a load mode, or mark the payload type.
+Byte `3` is reserved for flags. Right now, my bootloader does not use any flag bits, so the field is set to `0x00`. I keep it in the descriptor so future versions can add simple options without changing the layout. For example, a later version could use flag bits to select a load mode, or mark the program type.
 
 The multi-byte fields are stored big-endian, with the most significant byte first.
 
-A normal one-sector payload setup looks like this:
+A normal one-sector program setup looks like this:
 
 ```text
 42 54 31 00 00 00 03 EB 02 00 00 01
@@ -148,12 +148,12 @@ Breaking that down:
 ```text
 42 54 31      BT1 signature
 00            flags / reserved
-00 00 03 EB   payload start block = 1003
+00 00 03 EB   program start block = 1003
 02 00         load address = 0x0200
 00 01         sector count = 1
 ```
 
-If the payload still starts at block `1003` and still loads at `0x0200`, but grows to three sectors, only the final field changes:
+If the program still starts at block `1003` and still loads at `0x0200`, but grows to three sectors, only the final field changes:
 
 ```text
 42 54 31 00 00 00 03 EB 02 00 00 03
@@ -165,7 +165,7 @@ For example, after descriptor block `1002` is copied to `0x0400`, the ROM expect
 
 ```text
 0x0400..0x0402 = 'B' 'T' '1'
-0x0404..0x0407 = payload start block
+0x0404..0x0407 = program start block
 0x0408..0x0409 = load address
 0x040A..0x040B = sector count
 ```
@@ -173,7 +173,7 @@ For example, after descriptor block `1002` is copied to `0x0400`, the ROM expect
 So the ROM can do direct memory reads:
 
 ```text
-Read 0x0404..0x0407 to learn the SD payload block.
+Read 0x0404..0x0407 to learn the SD program block.
 Read 0x0408..0x0409 to learn the RAM load address.
 Read 0x040A..0x040B to learn how many sectors to copy.
 ```
@@ -201,7 +201,7 @@ The descriptor itself is read to:
 0x0400..0x05FF
 ```
 
-The usual stage-2 payload load address is:
+The usual stage-2 RAM load address is:
 
 ```text
 0x0200
@@ -223,7 +223,7 @@ $C = low byte of destination RAM address
 $D = high byte of destination RAM address
 ```
 
-For example, if the descriptor says the payload starts at block `1003`, the 32-bit block value is stored in scratch RAM as `00 00 03 EB`.
+For example, if the descriptor says the program starts at block `1003`, the 32-bit block value is stored in scratch RAM as `00 00 03 EB`.
 
 In hexadecimal, that value is:
 
@@ -271,7 +271,7 @@ At a high level, it does this:
 4. Check that 0x0400..0x0402 contains 'B' 'T' '1'.
 5. Copy the descriptor fields into scratch RAM.
 6. Make sure the sector count is not zero.
-7. Read the requested number of payload sectors into RAM.
+7. Read the requested number of program sectors into RAM.
 8. Jump to the descriptor-provided load address.
 ```
 
@@ -306,11 +306,11 @@ Expected values:
 
 That is the `BT1` signature. If any byte does not match, the bootstrap jumps to its failure path and prevents the ROM from treating random SD-card data as a valid boot descriptor.
 
-## Stage-2 Payload Transfer
+## Stage-2 Program Transfer
 
 Once the descriptor is validated, the ROM copies the descriptor fields into scratch RAM.
 
-The payload start block from `0x0404..0x0407` becomes the current SD block number at `0x0100..0x0103`.
+The program start block from `0x0404..0x0407` becomes the current SD block number at `0x0100..0x0103`.
 
 The load address from `0x0408..0x0409` is stored in two places:
 
@@ -338,11 +338,11 @@ decrements the remaining sector count
 
 Adding `0x0200` advances the destination by exactly 512 bytes, because one SD sector is 512 bytes.
 
-When the remaining sector count reaches zero, the payload has been copied into RAM.
+When the remaining sector count reaches zero, the stage-2 program has been copied into RAM.
 
 ## Stage-2 Jump
 
-After the payload is loaded, the ROM jumps to the descriptor-provided load address.
+After the program is loaded, the ROM jumps to the descriptor-provided load address.
 
 The current convention is that the load address is also the entry address. So if the descriptor says:
 
@@ -370,11 +370,11 @@ In the multi-sector version, the current markers are:
 0x23  descriptor block read succeeded
 0x33  descriptor magic validated
 0x44  descriptor fields copied, load phase begins
-0x55  all payload sectors loaded
+0x55  all program sectors loaded
 0x99  failure
 ```
 
-During the multi-sector load loop, the bootstrap also displays a small counter for completed sector reads. It makes it easier to tell whether the loader is failing before the payload, during the payload copy, or after the payload copy.
+During the multi-sector load loop, the bootstrap also displays a small counter for completed sector reads. It makes it easier to tell whether the loader is failing before the program copy, during the program copy, or after the program copy.
 
 # Single-Sector Version vs Multi-Sector Version
 
@@ -387,9 +387,9 @@ load address = 0x0200
 sector count = 1
 ```
 
-Then it reads one payload block into RAM at `0x0200` and jumps there. This version is easier to reason about during early bring-up.
+Then it reads one program block into RAM at `0x0200` and jumps there. This version is easier to reason about during early bring-up.
 
-The newer version supports the descriptor-provided load address and sector count. It can read multiple contiguous sectors into RAM and then jump to the loaded payload.
+The newer version supports the descriptor-provided load address and sector count. It can read multiple contiguous sectors into RAM and then jump to the loaded program.
 
 For the current project direction, the multi-sector version is the more useful one because larger OLED demos and monitor programs can exceed one 512-byte sector.
 
@@ -397,7 +397,7 @@ For the current project direction, the multi-sector version is the more useful o
 
 Two small Python scripts handle the host-computer side of the SD bootstrap flow.
 
-`make_bootdesc.py` creates a 512-byte `BT1` descriptor sector. `deploy_asm.py` assembles a program with `customasm`, trims the assembled image from the requested origin, packages the result for ROM or SD use, and can write the SD payload directly to the card.
+`make_bootdesc.py` creates a 512-byte `BT1` descriptor sector. `deploy_asm.py` assembles a program with `customasm`, trims the assembled image from the requested origin, packages the result for ROM or SD use, and can write the SD-loaded program directly to the card.
 
 The examples below show the same flow on Linux and Windows. The device names are from my own test machines, so they should not be copied blindly. Always identify the SD card first and confirm its size before a direct write.
 
@@ -441,7 +441,7 @@ A ROM build does not need SD-card access:
 python3 deploy_asm.py rom sd_bootstrap_v2_multi_sector.asm --origin 0xC000 --dump-annotated --out-dir ROM
 ```
 
-A direct SD payload write can be done with `deploy_asm.py`:
+A direct SD program write can be done with `deploy_asm.py`:
 
 ```bash
 sudo env "PATH=$PATH" python3 deploy_asm.py sd test_program.asm --origin 0x0200 --device /dev/sdb1 --block 1003 --descriptor-block 1002 --dump-annotated --out-dir SD
@@ -454,13 +454,13 @@ The `sudo env "PATH=$PATH"` form keeps the normal shell path available to the sc
 
 <figure>
     <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/sd_bootstrap/sd_bootstrap_deploy_session.png" alt="Linux terminal output from the SD bootstrap descriptor and deploy_asm workflow">
-    <figcaption>Figure 2: Linux terminal output for the BT1 descriptor, ROM bootstrap build, and multi-sector stage-2 payload write.</figcaption>
+    <figcaption>Figure 2: Linux terminal output for the BT1 descriptor, ROM bootstrap build, and multi-sector stage-2 program write.</figcaption>
 </figure>
 <br>
 
-The script checks the trimmed payload size. If the payload fits in one 512-byte sector, the script writes one padded sector at the payload block. In that single-sector path, it does not automatically rewrite the BT1 descriptor.
+The script checks the trimmed program size. If the program fits in one 512-byte sector, the script writes one padded sector at the program block. In that single-sector path, it does not automatically rewrite the BT1 descriptor.
 
-If the payload is larger than one sector, the script writes a padded multi-sector payload at the payload block, creates a BT1 descriptor, writes the descriptor to the descriptor block, and verifies both with readback checks.
+If the program is larger than one sector, the script writes a padded multi-sector program image at the program block, creates a BT1 descriptor, writes the descriptor to the descriptor block, and verifies both with readback checks.
 
 <figure>
     <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/sd_bootstrap/sd_bootstrap_output_files.png" alt="Generated Linux ROM and SD output files from deploy_asm">
@@ -515,7 +515,7 @@ ROM build:
 python deploy_asm.py rom sd_bootstrap_v2_multi_sector.asm --origin 0xC000 --dump-annotated --out-dir ROM
 ```
 
-Direct SD payload write:
+Direct SD program write:
 
 ```powershell
 python deploy_asm.py sd test_program.asm --origin 0x0200 --device "\\.\PhysicalDrive5" --windows-lock-volume "\\?\Volume{2a7913e0-4753-11f1-a6cb-28cdc480a7e2}\" --block 1003 --descriptor-block 1002 --dump-annotated --out-dir SD
@@ -525,11 +525,11 @@ The Windows output mirrors the Linux flow from writing the descriptor to running
 
 <figure>
     <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/sd_bootstrap/sd_bootstrap_windows_deploy_session.jpg" alt="Windows PowerShell output from the SD bootstrap descriptor and deploy_asm workflow">
-    <figcaption>Figure 5: Windows PowerShell output for the BT1 descriptor, ROM bootstrap build, and multi-sector stage-2 payload write.</figcaption>
+    <figcaption>Figure 5: Windows PowerShell output for the BT1 descriptor, ROM bootstrap build, and multi-sector stage-2 program write.</figcaption>
 </figure>
 <br>
 
-The generated files match the same logical outputs as the Linux run: descriptor file, ROM files, trimmed SD payload, padded payload, generated descriptor, annotated listing, and manifest.
+The generated files match the same logical outputs as the Linux run: descriptor file, ROM files, trimmed SD program image, padded program image, generated descriptor, annotated listing, and manifest.
 
 <figure>
     <img src="{{ site.url }}{{ site.baseurl }}/assets/img/posts/8-bit_bb_cpu/sd_bootstrap/sd_bootstrap_windows_output_files.jpg" alt="Generated Windows ROM and SD output files from deploy_asm">
@@ -544,8 +544,8 @@ The current baseline values are:
 ```text
 ROM origin:             0xC000
 Descriptor block:       1002
-Payload start block:    1003
-Payload load address:   0x0200
+Program start block:    1003
+RAM load address:       0x0200
 Descriptor scratch RAM: 0x0400
 Sector size:            512 bytes
 Descriptor format:      BT1
