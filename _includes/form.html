@@ -1,4 +1,4 @@
-<form id="contactForm" action="https://formspree.io/f/mvojooaw" method="post" novalidate>
+<form id="contactForm" action="https://formspree.io/f/mvojooaw" method="post">
   <div class="form__input half">
     <label for="name">Name</label>
     <input type="text" name="name" id="name" autocomplete="name" required>
@@ -11,11 +11,13 @@
 
   <div class="form__input">
     <label for="message">Message</label>
-    <textarea type="text" name="message" id="message" rows="7" autocomplete="message" required></textarea>
+    <textarea name="message" id="message" rows="7" required></textarea>
   </div>
 
   <input type="hidden" name="_subject" value="Website Form submission">
   <input type="hidden" name="_format" value="plain" />
-  <input class="hidden" type="text" name="_gotcha">
-  <button class="btn js-submit" type="submit" value="Send">Send</button>
+  <input class="hidden" type="text" name="_gotcha" autocomplete="off" tabindex="-1">
+  <button class="btn" type="submit">Send</button>
+  <p id="contact-status" role="status"></p>
 </form>
+<script src="{{ '/assets/js/contact.js' | relative_url }}" defer></script>
