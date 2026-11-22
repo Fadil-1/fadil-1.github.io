@@ -9,8 +9,13 @@
       
       <nav class="header__links">
         <div class="container header__links-wrapper">
+          {% assign page_section = page.url | slice: 0, 6 %}
           {% for item in site.navigation %}
-            <a class="header__link" href="{{ item.link | relative_url }}" itemprop="url">
+            <a class="header__link" href="{{ item.link | relative_url }}" itemprop="url"
+              {% if item.link == '/blog' and page_section == '/blog/' %}
+                aria-current="{% if page.url == '/blog/' %}page{% else %}location{% endif %}"
+              {% endif %}
+            >
               <span class="items-title" itemprop="name">{{ item.name }}</span>
             </a>
           {% endfor %}

@@ -6,7 +6,11 @@ layout: compress
 
   {% include head.html %}
 
-  <body class="site">
+  {% assign blog_index = false %}
+  {% if page.url == '/blog/' %}
+    {% assign blog_index = true %}
+  {% endif %}
+  <body class="site{% if blog_index %} blog-page{% endif %}">
     <style>
       
       .hero--small {
@@ -33,12 +37,18 @@ layout: compress
     {% endif %}
 
     {% include header.html %}
-<div class="hero--small">
-<div class="hero__wrap">
-<h1 class="hero__title">{{ page.title }}</h1>
-</div>
-</div>
-    <main class="site__content">
+    {% unless blog_index %}
+      <div class="hero--small">
+        <div class="hero__wrap">
+          <h1 class="hero__title">{{ page.title }}</h1>
+        </div>
+      </div>
+    {% endunless %}
+
+    <main class="site__content{% if blog_index %} blog-index{% endif %}"{% if blog_index %} tabindex="0"{% endif %}>
+      {% if blog_index %}
+        <h1 class="blog-index__title">{{ page.title }}</h1>
+      {% endif %}
       <section class="blog">
         <div class="container">
           <div class="post-list" itemscope="" itemtype="http://schema.org/Blog">

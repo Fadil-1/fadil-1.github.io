@@ -51,6 +51,10 @@
   </style>
   <link rel="preload" href="{{ '/assets/css/main.css' | relative_url }}" as="style" onload="this.rel='stylesheet'">
   <link rel="preload" href="{{ '/assets/css/custom.css' | relative_url }}" as="style" onload="this.rel='stylesheet'">
+  {% assign page_section = page.url | slice: 0, 6 %}
+  {% if page_section == '/blog/' %}
+    <link rel="stylesheet" href="{{ '/assets/css/blog.css' | relative_url }}">
+  {% endif %}
   <noscript><link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}"></noscript>
   <script type="text/javascript">
    {% include loadCss.js %}
